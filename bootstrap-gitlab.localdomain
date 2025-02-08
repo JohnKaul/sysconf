@@ -1,0 +1,9 @@
+#! /bin/sh
+
+git init
+git remote add origin git@:server/sysconf.git
+git add .
+git rm --cached bootstrap-gitlab.localdoamin
+git commit -m "Initial commit."
+git push -u origin master
+rm bootstrap-gitlab.localdomain

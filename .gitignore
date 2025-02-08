@@ -1,0 +1,121 @@
+# Vim stuff
+##############################
+*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+# Object files
+##############################
+*.o
+*.ko
+
+# Libraries
+##############################
+*.com
+*.lib
+*.a
+
+# Shared objects
+##############################
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+##############################
+*.exe
+*.out
+*.app
+
+# Packages
+##############################
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Packing-only formats
+##############################
+*.iso
+*.tar
+
+# Package management formats
+##############################
+*.dmg
+*.xpi
+*.gem
+*.egg
+*.deb
+*.rpm
+
+# Logs and databases
+##############################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files
+##############################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# C++ objects and libs
+##############################
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# CMake
+###############################
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+install_manifest.txt
+
+# Automake
+# #############################
+/autom4te.cache/
+/config/
+Makefile.in
+aclocal.m4
+app.info
+compile
+config.h
+config.h.in
+config.log
+config.status
+configure.scan
+coverage_report
+depcomp
+install-sh
+libtool
+m4
+missing
+stamp-h1
+
+# Local stuff
+# This section is devoted to this project
+##############################
+tags
+makefile.bsd
+makefile.gnu
