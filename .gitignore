@@ -119,3 +119,6 @@ stamp-h1
 tags
 makefile.bsd
 makefile.gnu
+sysconf
+TODO
+test/*
