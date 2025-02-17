@@ -24,17 +24,24 @@ INCDIR		:=	src/include
 PREFIX		:=	/usr/local/bin
 
 CC			:=	cc
-CFLAGS		:=	-fno-exceptions -pipe -Wall -W -I $(SRCDIR) -I $(INCDIR)
+CFLAGS		:=	-fno-exceptions -pipe -Wall -W
+INCPATH		=	-I $(SRCDIR) -I $(SRCDIR)
 REMOVE		:=	rm -f
 CP			:=	cp
 CTAGS       :=	ctags
 
+#-X- OBJECTS = $(SOURCES:.c=.o)
 #--------------------------------------------------------------------
 # Define the target compile instructions.
 #--------------------------------------------------------------------
-sysconf: ctags cleanobjs
+
+# By listing the header files as a dependency as well, it ensures that
+# if a change was made to a header file then the entire program will
+# be rebuilt.
+
+sysconf: $(HEADERS) ctags cleanobjs
 	SYSCONF_TARGET='sysconf'
-		@$(CC) $(CFLAGS) -o sysconf $(SOURCES)
+		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
 		@md2mdoc $(DOCDIR)/sysconf.md $(DOCDIR)/sysconf.7
 
 .PHONY: clean
