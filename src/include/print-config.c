@@ -65,6 +65,8 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
 
   int lines = 0;                                      /* Count the number of lines */
   char buffer[1024];                                  /* buffer stores the line */
+//:~    char *comment;
+//:~    comment = "# my comment.";
 
   while (fgets(buffer, sizeof(buffer), conf_file)) {
     char *str = buffer;
@@ -81,32 +83,47 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
         char *sep_pos = str;
         int spaces_before = 0;
         int spaces_after = 0;
-        char separator = ' ';
+        char separator;
+//:~          char separator = ' ';
         char terminator = ' ';
 
+        if (strnstr(str, "=", strlen(str))) separator = '=';
+        if (strnstr(str, ":", strlen(str))) separator = ':';
+
+        if (strnstr(str, ";", strlen(str))) terminator = ';';
+
         // Skip non-space characters until a space is reached
+//:~          while (*sep_pos != '\0' && !isspace(*sep_pos)) {
         while (*sep_pos != '\0' && \
-            (!isspace(*sep_pos) || *sep_pos == ':')) {
+              !isspace(*sep_pos) && \
+               *sep_pos != separator) {
           sep_pos++;
         }
 
         // Count the spaces before the separator
-        while (*sep_pos != '\0' && isspace(*sep_pos)) {
+//:~          while (*sep_pos != '\0' && isspace(*sep_pos)) {
+        while (isspace(*sep_pos) && \
+               *sep_pos != '\0' && \
+               *sep_pos != separator) {
           spaces_before++;
           sep_pos++;
         }
 
-        // Check if the separator is an equal sign or a colon
-        if (*sep_pos == '=') {
-          separator = '=';
-          sep_pos++;
-        } else if (*sep_pos == ':') {
-          separator = ':';
-          sep_pos++;
-        }
+//:~         // Check if the separator is an equal sign or a colon
+//:~         if (*sep_pos == '=') {
+//:~           separator = '=';
+//:~           sep_pos++;
+//:~         } else if (*sep_pos == ':') {
+//:~           separator = ':';
+//:~           sep_pos++;
+//:~         }
+
+        if (*sep_pos == separator) sep_pos++;
 
         // Count the spaces after the separator
         while (*sep_pos != '\0' && isspace(*sep_pos)) {
+//:~          while (*sep_pos != '\0' && \
+//:~                (isspace(*sep_pos) || *sep_pos != separator)) {
           spaces_after++;
           sep_pos++;
         }
@@ -117,8 +134,6 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
           if (*p == '"') quotes++;
         }
 
-        if (strnstr(str, ";", strlen(str))) terminator = ';';
-
         // Reconstruct the string
         char quote_char[2] = "";
         if (quotes == 2) {
@@ -126,8 +141,9 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
         }
         if (separator == '=' || separator == ':') {
           sprintf(str, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value, quote_char, terminator);
+//:~            sprintf(str, "%s%*s%c%*s%s%s%s%c%-8s%s\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value, quote_char, terminator, "", comment);
         } else {
-          sprintf(str, "%s%*s%s%s%s%c\n", key, spaces_before, "", value, quote_char, quote_char, terminator);
+          sprintf(str, "%s%*s%s%s%s%c\n", key, spaces_before, "", quote_char, value, quote_char, terminator);
         }
         found = 1;
       }
@@ -142,4 +158,3 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
   return lines;
 }
 /*}}}*/
-
