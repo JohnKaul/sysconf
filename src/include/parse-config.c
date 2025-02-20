@@ -247,10 +247,10 @@ void print_config_item(config_t* config, int count, const char* name) {     /*{{
  * @param count         The number of configuration entries.
  */
 void free_config(config_t *config, int count) {/*{{{*/
-//:~      for (int i = 0; i < count; i++) {
-//:~        free(config[i].values);
-//:~      }
-    while(count > 0) {
-      free(config[count--].values);
+    for (int i = 0; i < count; i++) {
+      free(config[i].values);
     }
+//:~      while(count > 0) {
+//:~        free(config[count--].values);
+//:~      }
 }/*}}}*/
