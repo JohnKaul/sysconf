@@ -59,6 +59,12 @@ const char program_version[] = "0.0.1";
 //
 // RETURN
 //  int
+//
+// TODO
+// 1. Support the "+=" and "-=" options.
+//      a. This will require a signifigant refactor; checking of each
+//         elements in the `arg_array` against the `config_array` will
+//         need to take place.
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
@@ -150,12 +156,17 @@ int main(int argc, char *argv[]) {
 
     // If the argument is equal to 'key=value' make a replacement.
     if(arg_count > 1) {
+      // Determine if we have a change to make; compare the arg_array and the config_array value.
+      //
+      // TODO: Assemble the array of char arrays into a temporary string and compiare those strings
+      //       instead of compairing a single element from each array.
       if (strncmp(arg_array[1], config_line_array[1], strlen(arg_array[1])) == 0) {
         printf("You have an exact match! %s & %s\n", arg_array[1], config_line_array[1]);
       } else {
+        // TODO: Clean up output to match `sysrc` output.
         printf("OLD:  %-5s\t=\t%s;\n", config_line_array[0], config_line_array[1]);
         printf("NEW:  %-5s\t=\t%s;\n", config_line_array[0], arg_array[1]);
-        replacevariable(config_line_array[0], arg_array[1], file_string);
+        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
       }
     }
   }

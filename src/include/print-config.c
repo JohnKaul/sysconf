@@ -54,7 +54,7 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
  * value            :   the value in the key/value array.
  * filename         :   the config file to change.
  */
-int replacevariable(const char *key, const char *value, const char *filename) {/*{{{*/
+int replacevariable(const char *key, char **value, int count, const char *filename) {/*{{{*/
   FILE* conf_file = fopen(filename, "r");
   FILE* temp_file = fopen(".sys.conf.file.tmp", "w");
   int found = 0;
@@ -140,10 +140,10 @@ int replacevariable(const char *key, const char *value, const char *filename) {/
           quote_char[0] = '"';
         }
         if (separator == '=' || separator == ':') {
-          sprintf(str, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value, quote_char, terminator);
+          sprintf(str, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value[1], quote_char, terminator);
 //:~            sprintf(str, "%s%*s%c%*s%s%s%s%c%-8s%s\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value, quote_char, terminator, "", comment);
         } else {
-          sprintf(str, "%s%*s%s%s%s%c\n", key, spaces_before, "", quote_char, value, quote_char, terminator);
+          sprintf(str, "%s%*s%s%s%s%c\n", key, spaces_before, "", quote_char, value[1], quote_char, terminator);
         }
         found = 1;
       }
