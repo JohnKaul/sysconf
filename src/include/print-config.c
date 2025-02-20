@@ -61,7 +61,7 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
  *                      assumed to be an unwanted entry and is
  *                      skipped).
  * count            :   The number of elements in the array.
-*/
+ */
 char* assemble_strings(char **value, int count) {       /*{{{*/
     // Calculate the total length needed
     int total_length = 0;
@@ -178,7 +178,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 if (value_assembled == NULL) {
                     fclose(conf_file);
                     fclose(temp_file);
-                    return -1; // Handle memory allocation failure
+                    fprintf(stderr, "Unable to create final value string for config file writing.\n");
+                    AbortTranslation(abortRuntimeError);
                 }
 
                 // Calculate the length of the new line
@@ -188,7 +189,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     free(value_assembled);
                     fclose(conf_file);
                     fclose(temp_file);
-                    return -1; // Handle memory allocation failure
+                    fprintf(stderr, "Unable to allocate memory for new replacement string.\n");
+                    AbortTranslation(abortRuntimeError);
                 }
 
                 // Construct the new line
