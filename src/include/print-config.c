@@ -8,18 +8,15 @@
 #include <string.h>
 #include <ctype.h>
 
-// TODO: Make function headers constant.
-
-/*
- * Printconfifile
- *      Iterates the `config_array` and prints the items.
+/**
+ *: Printconfifile
+ * @brief               Iterates the `config_array` and prints the items.
  *
  * ARGS
- * config_t config_array    :   The array to pull data from.
- * array_count              :   The number of items in `config_array`.
+ * @param config_array  The array to pull data from.
+ * @param array_count   The number of items in `config_array`.
  *
- * RETURN
- *  void
+ * @return void
  */
 void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
@@ -55,7 +52,7 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
  * @param size          number of elements in `argvp`.
  * @param string        The string to append to `argvp`.
  */
-int add_to_array(char ***argvp, int size, const char *string) {
+int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
     // Reallocate memory for the new size of the array
     char **new_array = realloc(*argvp, (size + 1) * sizeof(char *));
     if (new_array == NULL) {
@@ -72,23 +69,19 @@ int add_to_array(char ***argvp, int size, const char *string) {
 
     return size + 1; // Return the new size of the array
 }
+/*}}}*/
 
 /**
  *: assemble_strings
- *      This function assebles the array of char arrays into a string
- *      (ommiting the first char array which should be the 'key' in a
- *      key/value string).
+ * @brief               This function assebles the array of char
+ *                      arrays into a string (ommiting the first char
+ *                      array which should be the 'key' in a key/value
+ *                      string).
  *
- * NOTE
- *      This method is (more) efficient--than using strcpy()--because
- *      it minimizes the number of memory operations and avoids the
- *      overhead of multiple string concatenation calls.
- *
- * ARGS
- * value            :   The array to assemble (the first entry is
+ * @param value         The array to assemble (the first entry is
  *                      assumed to be an unwanted entry and is
  *                      skipped).
- * count            :   The number of elements in the array.
+ * @param count         The number of elements in the array.
  */
 char* assemble_strings(char **value, int count) {       /*{{{*/
     // Calculate the total length needed
@@ -128,15 +121,14 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
 }
 /*}}}*/
 
-/*
- * replacevariable
- *      Replaces a items value in the config file.
+/**
+ *: replacevariable
+ * @brief               Replaces a items value in the config file.
  *
- * ARGS
- * key              :   the key in the key/value array.
- * value            :   the value (array) in the key/value array.
- * count            :   The value array count.
- * filename         :   the config file to change.
+ * @param key           The key in the key/value array.
+ * @param value         The value (array) in the key/value array.
+ * @param count         The value array count.
+ * @param filename      The config file to change.
  */
 int replacevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
     FILE* conf_file = fopen(filename, "r");
