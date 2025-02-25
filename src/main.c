@@ -50,6 +50,24 @@
 //-------------------------------------------------------------------
 const char program_version[] = "0.0.1";
 
+/**
+ *: Contains
+ * @brief               This procedure will search and array for a given value.
+ *
+ * @param array         An array of char arrays to search.
+ * @param value         A char array to search for.
+ *
+ * @returns 0 = Not found. 1 = Item found.
+ */
+int contains(char **array, int size, const char *value) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(array[i], value) == 0) {
+            return 1; // Found
+        }
+    }
+    return 0; // Not found
+}
+
 //------------------------------------------------------*- C -*------
 // Main
 //
@@ -156,17 +174,19 @@ int main(int argc, char *argv[]) {
 
     // If the argument is equal to 'key=value' make a replacement.
     if(arg_count > 1) {
-      // Determine if we have a change to make; compare the arg_array and the config_array value.
-      //
-      // TODO: Assemble the array of char arrays into a temporary string and compiare those strings
-      //       instead of compairing a single element from each array.
-      if (strncmp(arg_array[1], config_line_array[1], strlen(arg_array[1])) == 0) {
-        printf("You have an exact match! %s & %s\n", arg_array[1], config_line_array[1]);
-      } else {
-        // TODO: Clean up output to match `sysrc` output.
-        printf("OLD:  %-5s\t=\t%s;\n", config_line_array[0], config_line_array[1]);
-        printf("NEW:  %-5s\t=\t%s;\n", config_line_array[0], arg_array[1]);
+
+      // Count the config_line_array number of elements.
+      int i = 0;
+      for (; config_line_array[i] != NULL; i++)
+        ;
+
+      // Determine if we have a change to make; compare the arg_array
+      // and the config_array value.
+      if (contains(config_line_array, i, arg_array[1]) == 0) {
+        printf("%-5s\t-->\t%-5s\n", config_line_array[1], arg_array[1]);
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+      } else {
+        printf("Value found. No change made.\n");
       }
     }
   }
