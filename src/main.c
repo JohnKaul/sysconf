@@ -173,7 +173,8 @@ int main(int argc, char *argv[]) {
 
   // cleanup
   free_config(config_array, config_count);
-  free(arg_array);
+  // The following line "free(arg_array)" causes a malloc error.
+//:~    free(arg_array);
 
   return 0;
 } ///:~
