@@ -8,6 +8,8 @@
 #include <string.h>
 #include <ctype.h>
 
+// TODO: Make function headers constant.
+
 /*
  * Printconfifile
  *      Iterates the `config_array` and prints the items.
@@ -45,15 +47,41 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 }
 /*}}}*/
 
-/*
- * assemble_strings
+/**
+ *: add_to_array
+ * @brief               appends `string` to the end of `argvp`.
+ *
+ * @param ***argvp      An array to store the array into.
+ * @param size          number of elements in `argvp`.
+ * @param string        The string to append to `argvp`.
+ */
+int add_to_array(char ***argvp, int size, const char *string) {
+    // Reallocate memory for the new size of the array
+    char **new_array = realloc(*argvp, (size + 1) * sizeof(char *));
+    if (new_array == NULL) {
+        return -1; // Memory allocation failed
+    }
+
+    *argvp = new_array; // Update the original pointer to point to the new array
+
+    // Allocate memory for the new string and add it to the array
+    (*argvp)[size] = strndup(string, strlen(string));
+    if ((*argvp)[size] == NULL) {
+        return -1; // Memory allocation for the string failed
+    }
+
+    return size + 1; // Return the new size of the array
+}
+
+/**
+ *: assemble_strings
  *      This function assebles the array of char arrays into a string
  *      (ommiting the first char array which should be the 'key' in a
  *      key/value string).
  *
  * NOTE
- *      This method is efficient (vs using strcpy()) because it
- *      minimizes the number of memory operations and avoids the
+ *      This method is (more) efficient--than using strcpy()--because
+ *      it minimizes the number of memory operations and avoids the
  *      overhead of multiple string concatenation calls.
  *
  * ARGS
@@ -173,8 +201,38 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     quote_char[0] = '"';
                 }
 
+                // check the `value` array for the plus (+) sign;
+                // if found, then:
+                //  1. Check the entries in `value` are not already in
+                //     the config file value array.
+                //  2. Assemble the arrays.
+                //
+                char **current_config_array;
+                int argc;
+                if (strstr(value[0], "+") != NULL) {
+//:~                    printf("\t I found a plus sign! %s\n", value[0]);
+                  // XXX: make delimiters a global variable which can be referenced here.
+                  char delimiters[] = " \t\n\":=;";
+                  // 1. tokenize the buffer,
+                  // 2. Add the rest of the values to the token array `current_config_array'
+                  // 3. Remove the `key` postion from the `current_config_array` array.
+                  // 4. Replace the `value` array with the new array `current_config_array`.
+                  argc = make_argv(str, delimiters, &current_config_array);
+                  for (int i = 1; i < argc; i++) {
+//:~                      printf("\tvalue[%d] = %s\n", i, value[i]);
+//:~                      printf("\tcurrent_config_array[%d] = %s\n", i, current_config_array[i]);
+                    count = add_to_array(&value, count, current_config_array[i]);
+                  }
+//:~                    printf("Added element(s) to array, here are the results\n");
+                }
+
+//:~                  // just print the value array.
+//:~                  for (int i = 0; i < count; i++)
+//:~                    printf("\t==> value[%d]:%s\n", i, value[i]);
+
                 // Assemble the new value string
                 char *value_assembled = assemble_strings(value, count);
+//:~                  printf("Assembled String: %s\n", value_assembled);
                 if (value_assembled == NULL) {
                     fclose(conf_file);
                     fclose(temp_file);
@@ -201,6 +259,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 fputs(new_line, temp_file);
                 free(new_line);
                 free(value_assembled);
+
+                free(value);
                 found = 1;
             }
         } else {
