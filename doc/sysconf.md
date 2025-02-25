@@ -19,7 +19,7 @@ Configuration file
 # DESCRIPTION
 This utility will print/change a configuration value stored in a configuration file formatted in the typical key/value syntax.
 
-By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a temination character and either spaces or an equal sign seperation).
+By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a temination character and either spaces or an equal sign or colon seperation character).
 
 Configuration file syntaxes this utility can parse:
 ```
@@ -29,6 +29,8 @@ Configuration file syntaxes this utility can parse:
     key="value"
     key value
     key value;
+    key:"value"
+    key = "value1 value2";
     etc.
 ```
 
