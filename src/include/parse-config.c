@@ -85,7 +85,9 @@ int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
     token = strtok_r(NULL, delimiters, &saveptr);
   }
 
-  free(tokenized_string);
+  // Set the last element to NULL to act as a sentinel
+  (*argvp)[tokens] = NULL;  free(tokenized_string);
+
   return tokens;
 }
 /*}}}*/
