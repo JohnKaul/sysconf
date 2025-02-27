@@ -141,5 +141,5 @@ config_t* find_config_item(config_t* config, const char* name, int count);
 //      "Unix(TM) Systems Programming: Communication, Concurrency, and
 //      Threads" By Kay A. Robbins, Steven Robbins
 //      However the one listed in the book had a memmory leak, I have
-//      made this version to correct that issue.
+//      made this version to correct that issue and be a bit more robust.
 int make_argv(const char *buf, const char *delimiters, char ***argvp);
