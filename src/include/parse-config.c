@@ -190,6 +190,9 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
       i++;
     }
 
+    // Set the last element to NULL to act as a sentinel
+    (argv)[i] = NULL;
+
     *count = i;
     fclose(file);
     return config;
@@ -208,10 +211,10 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
  */
 char **get_value(config_t* config, int count, const char* name) {        /*{{{*/
     for (int i = 0; i < count; i++) {
-        if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
-            return config[i].values;
-        }
-    }
+      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+        return config[i].values;
+      }
+  }
     return NULL;
 }
 /*}}}*/
