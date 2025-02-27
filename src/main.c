@@ -59,7 +59,7 @@ const char program_version[] = "0.0.1";
  *
  * @returns 0 = Not found. 1 = Item found.
  */
-int contains(char **array, int size, const char *value) {
+int contains(char **array, int size, const char *value) {       /*{{{*/
     for (int i = 0; i < size; i++) {
         if (strcmp(array[i], value) == 0) {
             return 1; // Found
@@ -67,6 +67,7 @@ int contains(char **array, int size, const char *value) {
     }
     return 0; // Not found
 }
+/*}}}*/
 
 //------------------------------------------------------*- C -*------
 // Main
@@ -86,17 +87,21 @@ int contains(char **array, int size, const char *value) {
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
-  int commentflag = 0;
-  char *file_string = NULL;
-  char *arg_string = NULL;
+  int commentflag = 0;                                  /* Used to determine if
+                                                           in-line comments should
+                                                           be printed. */
 
-  // --Check the command line arguments.
-  //   if there are not enough arguments, exit.
+  char *file_string = NULL;                             /* Used to store config file name */
+  char *arg_string = NULL;                              /* Used to store the argument string. */
+
+  // -Check the command line arguments.
+  //  if there are not enough arguments, exit.
   if (argc < 3) {
     fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
+  // TODO: Switch to `getopt()`.
   for (int i = 0; i < argc; i++) {
     if (argv[i] && strlen(argv[i]) > 1) {
       if (argv[i][0] == '-' && argv[i][1] == 'c') { commentflag = 1; }
@@ -105,62 +110,79 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // If ther isnt a file_string variable, quit.
+  // -If there is not a `file_string` variable, quit.
   if (! file_string) {
     fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
-  // keep a record of how many items in the config file.
+  // -Keep a record of how many items in the config file.
   int config_count = 0;
   int arg_count = 0;
   char delimiters[] = " \t\n\":=;";
 
-  // Parse the config file.
+  // -Parse the config file.
   config_t* config_array = parse_config(file_string, &config_count, delimiters);
 
-  // If we couldn't parse the file, quit.
+  // -If we couldn't parse the file, quit.
   if (!config_array) {
     printf("Failed to parse the configuration file.\n");
     free(config_array);
     return 1;
   }
 
-  // No argument (key = value or key) given so just print the config values.
+  // -No argument (key = value or key) given so just
+  //  print the config values.
   if( argc == 3) {
     printconfigfile(config_array, config_count);
     return 0;
   }
 
-  // Parse the argument string passed to this program.
-  // Based on the size of this array, we are going to determine if we
-  // need to preform replacement operations or just list the value.
-  char **arg_array;                                     // Used to store the argument
-                                                        // string passed to this program.
+  // -Parse the argument string passed to this program.
+  //  Based on the size of this array, we are going to determine if we
+  //  need to preform replacement operations or just list the value.
+  char **arg_array;                                     /* Used to store the argument */
+                                                        /* string passed to this program. */
   arg_count = make_argv(arg_string, delimiters, &arg_array);
 
-  // Do things differently based on the number of arguments given.
-  // no argument;
+  // -Do things differently based on the number of arguments given.
+  //  no argument;
   //    disply the config file.
-  // key;
+  //  key;
   //    look up the key in the config_file and disply it's value.
-  // key=value;
-  //    Make a replacement in the config_file.
+  //  key=value;
+  //    Make a addition/replacement/update in the config_file.
   if(arg_count >= 1) {
 
     // Get the values associated with the argument passed to this function.
     char **config_line_array = get_value(config_array, config_count, arg_array[0]);
 
-    // If the value cannot be found, just exit.
-    if (config_line_array == NULL) return 1;
+    // If the key cannot be found in the config file, we need to check
+    // to see if the value is:
+    // 1. being searched for; if so, exit.
+    // 2. wanting to be added; if so, add it.
+    if (config_line_array == NULL) {
+      if(arg_count == 1) {                              /* Seems to be a simple search situation,
+                                                           since, we do not have a key in the config
+                                                           file, we exit.*/
+        free(arg_array);                                /* cleanup */
+        return 1;
+      }
+      if(arg_count > 1) {                               /* Seems to be a condition where the key/value
+                                                           needs to be appended to the config file.*/
+        printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
+        writevariable(arg_array[0], arg_array, arg_count, file_string);
 
-     // if we only have a 'key' as an argument; just find in the
-     // config and display the value set.
-    if(arg_count == 1) {
+        free(arg_array);                                /* cleanup */
+        return 1;
+      }
+    }
 
-      // We could use the syntax: "config_line_array[0], config_line_array[1]" but we can also
-      // just itterate the array. Fut first, we have to pop the first value (the key).
-      config_line_array += 1;                        // strip the 'key' from the array
+    // -If we only have a 'key' as an argument; just find in the
+    //  config and display the value set.
+    if(config_line_array != NULL && arg_count == 1) {
+      // Itterate the array and print chars.
+      config_line_array += 1;                           /* strip the 'key' from the array */
       while(*config_line_array) {
         if(commentflag == 0) {
           if(memcmp(*config_line_array, "#", 1) == 0) {
@@ -172,7 +194,8 @@ int main(int argc, char *argv[]) {
       printf("\n");
     }
 
-    // If the argument is equal to 'key=value' make a replacement.
+    // -If the argument is equal to 'key=value' make a replacement.
+    // -However, if the argument is 'key+=value' make an update.
     if(arg_count > 1) {
 
       // Count the config_line_array number of elements.
@@ -180,20 +203,33 @@ int main(int argc, char *argv[]) {
       for (; config_line_array[i] != NULL; i++)
         ;
 
-      // Determine if we have a change to make; compare the arg_array
-      // and the config_array value.
-      if (contains(config_line_array, i, arg_array[1]) == 0) {
-        printf("%-5s\t-->\t%-5s\n", config_line_array[1], arg_array[1]);
-        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
-      } else {
+      // -Determine if we have a change to make; compare the `arg_array`
+      //  and the `config_array` values.
+      if (contains(config_line_array, i, arg_array[1]) == 0) {          /* if the value already exists... */
+        if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
+          // update variable...
+          printf("%-5s\t- + ->\t%-5s\n", config_line_array[1], arg_array[1]);
+          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        } else {                                                        /* just a simple = statement */
+          // replacing a variable...
+          printf("%-5s\t- = ->\t%-5s\n", config_line_array[1], arg_array[1]);
+          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        }
+      } else {                                                          /* Value found, exit */
         printf("Value found. No change made.\n");
+        // free stuff here
+        free(arg_array);
+        return 0;
       }
-    }
-  }
+
+    }   /* end_ if(arg_count > 1)  */
+  }     /* end_ if(arg_count >= 1) */
 
   // cleanup
   free_config(config_array, config_count);
-  // The following line "free(arg_array)" causes a malloc error.
+
+  // The following line "free(arg_array)" causes a
+  // malloc error durring a key=value operation.
 //:~    free(arg_array);
 
   return 0;
