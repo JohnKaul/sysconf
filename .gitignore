@@ -122,3 +122,4 @@ makefile.gnu
 sysconf
 TODO
 test/*
+sysconf.md
