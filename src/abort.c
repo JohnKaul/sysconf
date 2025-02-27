@@ -1,15 +1,14 @@
 #include "abort.h"
 
-/*
- * AbortTranslation --
- *      A fatal error occurred durring the translation. Print the abort
- *      code and then exit.
+/**
+ *: AbortTranslation
+ * @brief A fatal error occurred durring the translation. Print the abort
+ *        code and then exit.
  *
  * ARGS
- *  ac              :   abort code [-i.e. TabAbortCode]
+ * @ param ac   abort code [-i.e. TabAbortCode]
  *
- * RETURN
- *  void
+ * @return void
  *
  * EXAMPLE USAGE
  *  // --Check the command line arguments.
@@ -23,4 +22,3 @@ void AbortTranslation ( enum TAbortCode ac ) {     /*{{{*/
     fprintf(stderr, "**** Fatal translation error: %s\n", abortMsg[-ac]);
     exit ( ac );
 } /*}}}*/
-
