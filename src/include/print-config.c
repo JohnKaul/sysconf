@@ -17,6 +17,8 @@
  * @param array_count   The number of items in `config_array`.
  *
  * @return void
+ *
+ * XXX: Delete function
  */
 void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
@@ -31,10 +33,9 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
     printf("%-10s\t=\t", config_array[i].values[0]);
     // just itterate the line array.
-    config_line_array += 1;                        // strip the 'key' from the array
+    config_line_array += 1;                             /* strip the 'key' from the array */
     while(*config_line_array) {
-      // do not print comments
-      if(memcmp(*config_line_array, "#", 1) == 0) {
+      if(memcmp(*config_line_array, "#", 1) == 0) {     /* do not print comments. */
         break;
       }
       printf("%s ", *config_line_array++);
@@ -59,15 +60,15 @@ int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
         return -1; // Memory allocation failed
     }
 
-    *argvp = new_array; // Update the original pointer to point to the new array
+    *argvp = new_array;                                 /* Update the original pointer to point to the new array */
 
     // Allocate memory for the new string and add it to the array
     (*argvp)[size] = strndup(string, strlen(string));
     if ((*argvp)[size] == NULL) {
-        return -1; // Memory allocation for the string failed
+        return -1;                                      /* Memory allocation for the string failed */
     }
 
-    return size + 1; // Return the new size of the array
+    return size + 1;                                    /* Return the new size of the array */
 }
 /*}}}*/
 
@@ -90,32 +91,33 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
         total_length += strlen(value[i]);
     }
 
-    // Add space for separators (e.g., spaces)
-    total_length += count - 1; // For spaces between strings
+    // Add space for separators (-e.g., spaces)
+    total_length += count - 1;                          /* For spaces between strings */
 
     // Allocate memory for the final string
-    char *result = malloc(total_length + 1); // +1 for the null terminator
+    char *result = malloc(total_length + 1);            /* +1 for the null terminator */
     if (result == NULL) {
         perror("Failed to allocate memory");
         return NULL;
     }
 
     // Use a buffer to concatenate the strings
-    char *ptr = result; // Pointer to the current position in the buffer
+    char *ptr = result;                                 /* Pointer to the current position in the buffer */
     for (int i = 1; i < count; i++) {
         // Copy the current string into the buffer
         int len = strlen(value[i]);
         memcpy(ptr, value[i], len);
-        ptr += len; // Move the pointer forward by the length of the copied string
+        // Move the pointer forward by the the lenght of the copied string.
+        ptr += len;
 
         // Add a space if it's not the last string
         if (i < count - 1) {
-            *ptr = ' '; // Add a space
-            ptr++; // Move the pointer forward
+            *ptr = ' ';                                 /* Add a space */
+            ptr++;                                      /* Move the pointer forward */
         }
     }
 
-    *ptr = '\0'; // Null-terminate the final string
+    *ptr = '\0';                                        /* Null-terminate the final string */
 
     return result;
 }
@@ -131,17 +133,16 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
  * @param filename      The config file to change.
  */
 int replacevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
-    FILE* conf_file = fopen(filename, "r");
-    FILE* temp_file = fopen(".sys.conf.file.tmp", "w");
+    FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
+    FILE* temp_file = fopen(".sys.conf.file.tmp", "w"); /* Open a temp file READ/WRITE */
     int found = 0;
     if (!conf_file || !temp_file) {
         fprintf(stderr, "Unable to create temp file or read config file\n");
-        // Handle error appropriately (e.g., abort or return an error code)
         AbortTranslation(abortRuntimeError);
     }
 
-    int lines = 0; // Count the number of lines
-    char buffer[1024]; // buffer stores the line
+    int lines = 0;                                      /* Count the number of lines */
+    char buffer[1024];                                  /* buffer stores the line */
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
@@ -156,8 +157,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 char *sep_pos = str;
                 int spaces_before = 0;
                 int spaces_after = 0;
-                char separator;
+                char separator = '=';
                 char terminator = ' ';
+//:~                  char terminator = 0;
 
                 if (strnstr(str, "=", strlen(str))) separator = '=';
                 if (strnstr(str, ":", strlen(str))) separator = ':';
@@ -193,16 +195,14 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     quote_char[0] = '"';
                 }
 
-                // check the `value` array for the plus (+) sign;
-                // if found, then:
-                //  1. Check the entries in `value` are not already in
-                //     the config file value array.
-                //  2. Assemble the arrays.
-                //
+                // -Check the `value` array for the plus (+) sign;
+                //  if found, then:
+                //   1. Check the entries in `value` are not already in
+                //      the config file value array.
+                //   2. Assemble the arrays.
                 char **current_config_array;
                 int argc;
                 if (strstr(value[0], "+") != NULL) {
-//:~                    printf("\t I found a plus sign! %s\n", value[0]);
                   // XXX: make delimiters a global variable which can be referenced here.
                   char delimiters[] = " \t\n\":=;";
                   // 1. tokenize the buffer,
@@ -211,20 +211,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   // 4. Replace the `value` array with the new array `current_config_array`.
                   argc = make_argv(str, delimiters, &current_config_array);
                   for (int i = 1; i < argc; i++) {
-//:~                      printf("\tvalue[%d] = %s\n", i, value[i]);
-//:~                      printf("\tcurrent_config_array[%d] = %s\n", i, current_config_array[i]);
                     count = add_to_array(&value, count, current_config_array[i]);
                   }
-//:~                    printf("Added element(s) to array, here are the results\n");
                 }
-
-//:~                  // just print the value array.
-//:~                  for (int i = 0; i < count; i++)
-//:~                    printf("\t==> value[%d]:%s\n", i, value[i]);
 
                 // Assemble the new value string
                 char *value_assembled = assemble_strings(value, count);
-//:~                  printf("Assembled String: %s\n", value_assembled);
                 if (value_assembled == NULL) {
                     fclose(conf_file);
                     fclose(temp_file);
@@ -266,5 +258,35 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     remove(filename);
     rename(".sys.conf.file.tmp", filename);
     return lines;
+}
+/*}}}*/
+
+/**
+ *: writevariable
+ * @brief               Writes items value in the config file.
+ *
+ * @param key           The key in the key/value array.
+ * @param value         The value (array) in the key/value array.
+ * @param count         The value array count.
+ * @param filename      The config file to change.
+ */
+int writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
+  FILE* conf_file = fopen(filename, "a");
+  int spaces_before = 1;
+  int spaces_after = 1;
+  char separator = '=';
+  char terminator = ' ';
+//:~    char terminator = 0;
+
+  char quote_char[2] = "";
+  quote_char[0] = '"';
+
+  char *value_assembled = assemble_strings(value, count);
+
+  // Construct the new line
+  fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
+
+  fclose(conf_file);
+  return 0;
 }
 /*}}}*/

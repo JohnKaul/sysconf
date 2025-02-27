@@ -10,6 +10,10 @@
 //      Replaces a items value in the config file.
 int replacevariable(const char *key, char **value, int count, const char *filename);
 
+//: writevariable
+//      Write items in value in the config file.
+int writevariable(const char *key, char **value, int count, const char *filename);
+
 //: Printconfifile
 //      Iterates the `config_array` and prints the items.
 void printconfigfile(config_t *config_array,int array_count);
