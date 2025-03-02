@@ -93,6 +93,23 @@ int main(int argc, char *argv[]) {
 
   char *file_string = NULL;                             /* Used to store config file name */
   char *arg_string = NULL;                              /* Used to store the argument string. */
+  char delimiters[] = " \t\n\":=;";
+
+  /*
+  // The following works to parse a config file to find the default configuration file to read.
+  int my_config_count = 0;
+  config_t* my_config_array = parse_config("./sysconf.conf", &my_config_count, delimiters);
+  char **defaultconfig_line_array = get_value(my_config_array, my_config_count, "defaultconfig");
+
+  if (defaultconfig_line_array) {
+    file_string = defaultconfig_line_array[1];
+
+    int config_count = 0;
+    config_t* config_array = parse_config(file_string, &config_count, delimiters);
+
+    printconfigfile(config_array, config_count);
+  }
+  */
 
   // -Check the command line arguments.
   //  if there are not enough arguments, exit.
@@ -119,7 +136,6 @@ int main(int argc, char *argv[]) {
   // -Keep a record of how many items in the config file.
   int config_count = 0;
   int arg_count = 0;
-  char delimiters[] = " \t\n\":=;";
 
   // -Parse the config file.
   config_t* config_array = parse_config(file_string, &config_count, delimiters);
@@ -135,6 +151,7 @@ int main(int argc, char *argv[]) {
   //  print the config values.
   if( argc == 3) {
     printconfigfile(config_array, config_count);
+    free_config(config_array, config_count);
     return 0;
   }
 
@@ -166,6 +183,7 @@ int main(int argc, char *argv[]) {
                                                            since, we do not have a key in the config
                                                            file, we exit.*/
         free(arg_array);                                /* cleanup */
+        free_config(config_array, config_count);
         return 1;
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
@@ -174,6 +192,7 @@ int main(int argc, char *argv[]) {
         writevariable(arg_array[0], arg_array, arg_count, file_string);
 
         free(arg_array);                                /* cleanup */
+        free_config(config_array, config_count);
         return 1;
       }
     }
@@ -219,6 +238,7 @@ int main(int argc, char *argv[]) {
         printf("Value found. No change made.\n");
         // free stuff here
         free(arg_array);
+        free_config(config_array, config_count);
         return 0;
       }
 
