@@ -3,7 +3,7 @@ File Last Updated: October 21 2020 16:01
 
 File:    readme.md
 Author:  John Kaul <john.kaul@outlook.com>
-Brief:   This section should contain infomation about this project.
+Brief:   This section should contain information about this project.
 ------------------------------------------------------------------>
 
 # sysconf
@@ -20,11 +20,15 @@ sysconf -f configfile [key=value]
 -f      Configuration file
 
 ## DESCRIPTION
-This utility will print/change a configuration value stored in a configuration file formatted in the typical key/value syntax.
+This utility will print/change a configuration value stored in a configuration file formatted in a simple key/value syntax.
 
-By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a temination character and either spaces or an equal sign or colon seperation character).
+Operating systems and user tools have many configuration files which can be kept in many different syntax languages. On FreeBSD there are a few tools to parse system type configuration files (`sysrc` and `sysctl` for example) to parse/change a few of the different configuration syntaxes and each tool has it's own command flags and options. Managing system configuration files is typically done with tools like the ones listed or with an editor.
 
-Configuration file syntaxes this utility can parse:
+The current tool(s) in FreeBSD (`sysrc`) can be made to work on other files other than /etc/rc.conf but the tool does not handle configuration files written in UCL -i.e., with a dot in the name -e.g., jail.conf files. Other configuration settings (like: `sysctl` for kernel settings) are also kept using a different style than UCL. This utility is meant to offer simple key/value changes, for the different configuration styles/languages, in one tool (in lieu of several for example).  Although, this tool--while not being terribly robust and exhaustive--should offer the ability to make changes to many different style configuration key/value entries like the `sysrc` and `sysctl` type of tools with no external library dependencies. Meaning, this tool does not rely on third party libraries to parse UCL, JSON, etc. it uses a simple tokeniser to parse the entries and syntax to make changes/additions. Because this tool does not use external libraries, this ultimately limits it's use--it will not parse XML for example--but should offer a more consistent user interface for making changes to key/value type configuration files.
+
+By design this utility does not have many flags/options to specify actions to preform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+
+Example configuration file syntaxes this utility can parse/change:
 ```
     key=value
     key = value;
@@ -38,7 +42,15 @@ Configuration file syntaxes this utility can parse:
 ```
 
 *NOTE*:
-Some keys or values in configuration files can contain special characters like dollarsigns ($). To pass these types of vaiables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quates (').
+- Some keys or values in configuration files can contain special characters like dollarsigns ($). To pass these types of variables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quotes (').
+- This utility will not be able to read multi-line configuration values.
+- This utility will not be able to locate configuration keys in "sections". For example, if your configuration file (like an .htaccess file for Apache) contains multiple entries with the same key in separate sections.
+- This utility was not meant to replace the use of a text editor; it is only meant to offer simple(er) changes via scripting/automation.
+
+## FEATURES
+* Simple syntax - no command flags to remember and consistent syntax no matter the configuration language used.
+* Will not write a key twice - if a key/value already exists, this utility will not write a second entry.
+* Zero dependencies - will not break or fall behind if library is (not) updated.
 
 ## EXAMPLES
 To list off some key/values in a config file.
@@ -56,6 +68,11 @@ To change a value associated with a key.
     sysconf -f /path/config.file key=value
 ```
 
+To add to a value associated with a key.
+```
+    sysconf -f /path/config.file key+=value
+```
+
 To use a dollar sign in a key, escape it.
 ```
     sysconf -f /path/config.file \\$key
@@ -70,11 +87,11 @@ $ cd ~/<place>/<you>/<keep>/<your>/<code>
 $ git clone git@git.local:server/sysconf.git
 ```
 
-## BUILD INSTRUCTIONS 
+## BUILD INSTRUCTIONS
 
 ```bash
-$ cd sysconf 
-$ make 
+$ cd sysconf
+$ make
 ```
 
 ## CONTRIBUTION GUIDELINES
@@ -93,6 +110,9 @@ $ make
 8.  Use the imperative mood in the subject line
 9.  Wrap the body at 72 characters
 10. Use the body to explain what and why vs. how
+
+## HISTORY
+* Created for my personal use.
 
 ## AUTHOR
 * John Kaul - john.kaul@outlook.com
