@@ -56,6 +56,11 @@ To change a value associated with a key.
     sysconf -f /path/config.file key=value
 .Ed
 .Pp
+To add to a value associated with a key.
+.Bd -literal -offset indent
+    sysconf -f /path/config.file key+=value
+.Ed
+.Pp
 To use a dollar sign in a key, escape it.
 .Bd -literal -offset indent
     sysconf -f /path/config.file \\$key
