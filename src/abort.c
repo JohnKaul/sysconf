@@ -5,7 +5,6 @@
  * @brief A fatal error occurred durring the translation. Print the abort
  *        code and then exit.
  *
- * ARGS
  * @ param ac   abort code [-i.e. TabAbortCode]
  *
  * @return void
