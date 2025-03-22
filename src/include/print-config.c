@@ -107,7 +107,7 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
         // Copy the current string into the buffer
         int len = strlen(value[i]);
         memcpy(ptr, value[i], len);
-        // Move the pointer forward by the the lenght of the copied string.
+        // Move the pointer forward by the the length of the copied string.
         ptr += len;
 
         // Add a space if it's not the last string
@@ -195,6 +195,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     quote_char[0] = '"';
                 }
 
+                char *value_assembled;              /* used to store final output string. */
+
                 // -Check the `value` array for the plus (+) sign;
                 //  if found, then:
                 //   1. Check the entries in `value` are not already in
@@ -202,6 +204,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 //   2. Assemble the arrays.
                 char **current_config_array;
                 int argc;
+                int i = 1;
                 if (strstr(value[0], "+") != NULL) {
                   // XXX: make delimiters a global variable which can be referenced here.
                   char delimiters[] = " \t\n\":=;";
@@ -210,13 +213,29 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   // 3. Remove the `key` postion from the `current_config_array` array.
                   // 4. Replace the `value` array with the new array `current_config_array`.
                   argc = make_argv(str, delimiters, &current_config_array);
-                  for (int i = 1; i < argc; i++) {
+                  for (; i < argc; i++) {
                     count = add_to_array(&value, count, current_config_array[i]);
                   }
                 }
 
+                if (strstr(value[0], "-") != NULL) {
+                char **new_config_array = NULL;                                      /* Array used to add only items in current config_array that are not called out to be removed. */
+                int new_count = 1;
+                  // XXX: make delimiters a global variable which can be referenced here.
+                  char delimiters[] = " \t\n\":=;";
+                  argc = make_argv(str, delimiters, &current_config_array);
+                  for (; i < argc; i++) {
+                    if (count >= 1 && \
+                        strncmp(value[1], current_config_array[i], strlen(value[1])) != 0) {
+                      new_count = add_to_array(&new_config_array, new_count, current_config_array[i]);
+                    }
+                  }
+                  value = new_config_array;
+                  count = new_count;
+                }
+
                 // Assemble the new value string
-                char *value_assembled = assemble_strings(value, count);
+                value_assembled = assemble_strings(value, count);
                 if (value_assembled == NULL) {
                     fclose(conf_file);
                     fclose(temp_file);
@@ -225,7 +244,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 // Calculate the length of the new line
-                int new_line_length = strlen(key) + spaces_before + 1 + strlen(value_assembled) + strlen(quote_char) * 2 + spaces_after + 1; // +1 for terminator
+                int new_line_length = strlen(key) + spaces_before + 1 + strlen(value_assembled) + strlen(quote_char) * 2 + spaces_after + strlen(quote_char) + 1; // last 1+ for terminator
                 char *new_line = malloc(new_line_length + 1); // +1 for null terminator
                 if (new_line == NULL) {
                     free(value_assembled);
@@ -237,10 +256,10 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 // Construct the new line
                 char *ptr = new_line;
-                ptr += sprintf(ptr, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
-
+                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
                 // Write the new line to the temp file
                 fputs(new_line, temp_file);
+                fputs("\n", temp_file);
                 free(new_line);
                 free(value_assembled);
 
