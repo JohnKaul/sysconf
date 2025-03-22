@@ -80,10 +80,20 @@ int contains(char **array, int size, const char *value) {       /*{{{*/
 //  int
 //
 // TODO
-// 1. Support the "+=" and "-=" options.
-//      a. This will require a signifigant refactor; checking of each
-//         elements in the `arg_array` against the `config_array` will
-//         need to take place.
+// 1. Add a "default value check" where, when just listing out the
+//    values a default file is also parsed and the 'configfile' and
+//    the 'default_configfile' is checked. Any duplicates in the
+//    'configfile' promps a notice to remove duplicate.
+//      a. This can be done with the use of a `sysconf.config` file
+//         (possibly located at: ~/.config/sysconf/defaults.conf) where
+//         configutation files and their defaults are listed.
+//          EX:
+//              # USER                    DEFAULT
+//              # --------------------------------------------------
+//              /etc/rc.conf            = /etc/defaults/rc.conf
+//              /etc/sysctl.conf        =
+//              /etc/jail.conf.d/*.conf = /etc/jail.conf
+//      b. This will be a problem for the jail.conf file entry.
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
@@ -158,8 +168,8 @@ int main(int argc, char *argv[]) {
   // -Parse the argument string passed to this program.
   //  Based on the size of this array, we are going to determine if we
   //  need to preform replacement operations or just list the value.
-  char **arg_array;                                     /* Used to store the argument */
-                                                        /* string passed to this program. */
+  char **arg_array;                                     /* Used to store the argument
+                                                           string passed to this program. */
   arg_count = make_argv(arg_string, delimiters, &arg_array);
 
   // -Do things differently based on the number of arguments given.
@@ -227,15 +237,20 @@ int main(int argc, char *argv[]) {
       if (contains(config_line_array, i, arg_array[1]) == 0) {          /* if the value already exists... */
         if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
           // update variable...
-          printf("%-5s\t- + ->\t%-5s\n", config_line_array[1], arg_array[1]);
+          printf("%-5s\t- + ->\t%-5s\n", config_line_array[0], arg_array[1]);
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
         } else {                                                        /* just a simple = statement */
           // replacing a variable...
-          printf("%-5s\t- = ->\t%-5s\n", config_line_array[1], arg_array[1]);
+          printf("%-5s\t- = ->\t%-5s\n", config_line_array[0], arg_array[1]);
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
         }
-      } else {                                                          /* Value found, exit */
+      } else {                                                          /* Value found in configuration file already... */
+        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {  /* Check to see if the user wants a subtraction... */
+          printf("%-5s\t- - ->\t%-5s\n", config_line_array[0], arg_array[1]);
+          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        } else {
         printf("Value found. No change made.\n");
+        }
         // free stuff here
         free(arg_array);
         free_config(config_array, config_count);
