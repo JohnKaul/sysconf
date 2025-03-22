@@ -132,10 +132,20 @@ void print_config_item(config_t *config, int count, const char *name);
 //      A function to find a configuration value given a name.
 config_t* find_config_item(config_t* config, const char* name, int count);
 
+//: count_tokes
+//      Counts the number of tokens in the input string based on the delimiters.
+//
+int count_tokens(const char *input_string, const char *delimiters);
+
+//: populate_array
+//      Populates the argv array with tokens from the input string.
+int populate_array(const char *input_string, const char *delimiters, char ***argvp, int tokens);
+
 //: make_argv
 //      This function will take a string and tokenize it based on a
 //      delimeter and store the pointers to the strings into an array
 //      for easier access.
+//
 //  NOTE:
 //      The concept for this function came from the wonderful book
 //      "Unix(TM) Systems Programming: Communication, Concurrency, and

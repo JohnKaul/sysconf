@@ -7,90 +7,126 @@
 #include <ctype.h>  /* for isstring() */
 
 /**
- *: make_argv
- *  @brief              This function will take a string and parse it
- *                      based on a delimeter and store the string
- *                      pointers into an array for easier access.
+ *: count_tokes
+ * @brief Counts the number of tokens in the input string based on the delimiters.
  *
- * @param input_string  A string to parse
+ * @param input_string  A string to parse.
  * @param delimiters    A string of delimiters.
- * @param ***argvp      An array to store the array into.
  *
- * @return              The number of elements in the array.
+ * @return The number of tokens found, or -1 on error.
  */
-int make_argv(const char *input_string, const char *delimiters, char ***argvp) {  /*{{{*/
-  int tokens = 0;
-  // Construct a `stash` string and eliminate any prefix delimiters.
-  const char *stash = input_string + strspn(input_string, delimiters);
-
-  // duplicate the `stash` string into another string to count the
-  // number of tokens.
-  char *tokenized_string = strndup(stash, strlen(stash));
-  if (tokenized_string == NULL) {
-    // If there was an error allocating memory for the
-    // `tokenized_string`, cleanup.
-    **argvp = NULL;
-    return -1;
-  }
-
-  // Memory allocation
-  // ----------------------------------------------------------------
-
-  // Pop the first token from the string.
-  char *saveptr;
-  if(strtok_r(tokenized_string, delimiters, &saveptr) == NULL) {
-    // if error, cleanup.
-    free(tokenized_string);
-    **argvp = NULL;
-    return -1;
-  }
-
-  // We have at least one token sofar, keep tokenizing and count the
-  // number of tokens in the string.
-  for (tokens = 1; (strtok_r(NULL, delimiters, &saveptr) != NULL); tokens++)
-    ;
-
-  // Allocate memory for the string array based on the number of
-  // tokens in the string.
-  if ((*argvp = calloc(tokens + 1, sizeof(char *))) == NULL) {
-    free(tokenized_string);
-    **argvp = NULL;
-    return -1;
-  }
-
-  // Array construction
-  // ----------------------------------------------------------------
-
-  // Copy the `stash` string back into `tokenized_string`.
-  strncpy(tokenized_string, stash, strlen(stash));
-  char *token = strtok_r(tokenized_string, delimiters, &saveptr);
-
-  // Foreach token, copy the pointer into our array.
-  for (int i = 0; i < tokens; i++) {
-    // NOTE:
-    //      The `strndup` function copies the string into the array so
-    //      that the pointers associated with `tokenized_string` can
-    //      be `freed` at the end of this function.
-    if ((*(*argvp + i) = strndup(token, strlen(token))) == NULL) {
-      // If there was an error allocating memory for the token,
-      // then free all the memory allocated (back out).
-      for (int j = 0; j < i; j++) {
-        free((*argvp)[j]);
-      }
-      free(*argvp);
-      free(tokenized_string);
-      **argvp = NULL;
-      return -1;
+int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
+    if (input_string == NULL || delimiters == NULL) {
+        return -1; // Invalid input
     }
-    token = strtok_r(NULL, delimiters, &saveptr);
-  }
 
-  // Set the last element to NULL to act as a sentinel
-  (*argvp)[tokens] = NULL;  free(tokenized_string);
+    // Skip leading delimiters
+    const char *stash = input_string + strspn(input_string, delimiters);
 
-  return tokens;
+    // Check if stash is empty
+    if (*stash == '\0') {
+        return 0; // No tokens found
+    }
+
+    // Duplicate the string
+    char *tokenized_string = strdup(stash);
+    if (tokenized_string == NULL) {
+        return -1; // Memory allocation failed
+    }
+
+    char *saveptr;
+    int tokens = 0;
+
+    // Count tokens
+    if (strtok_r(tokenized_string, delimiters, &saveptr) != NULL) {
+        tokens = 1;
+        while (strtok_r(NULL, delimiters, &saveptr) != NULL) {
+            tokens++;
+        }
+    }
+
+    free(tokenized_string);
+    return tokens;
 }
-/*}}}*/
+/* }}} */
+
+/**
+ *: populate_array
+ * @brief Populates the argv array with tokens from the input string.
+ *
+ * @param input_string  A string to parse.
+ * @param delimiters    A string of delimiters.
+ * @param argvp        An array to store the tokens.
+ * @param tokens       The number of tokens to populate.
+ *
+ * @return 0 on success, -1 on error.
+ */
+int populate_array(const char *input_string, const char *delimiters, char ***argvp, int tokens) {/* {{{ */
+    const char *stash = input_string + strspn(input_string, delimiters);
+    char *tokenized_string = strndup(stash, strlen(stash));
+    if (tokenized_string == NULL) {
+        return -1; // Memory allocation failed
+    }
+
+    char *saveptr;
+    char *token = strtok_r(tokenized_string, delimiters, &saveptr);
+    for (int i = 0; i < tokens; i++) {
+        if (token == NULL) {
+            // If there are fewer tokens than expected, handle the error
+            break; // Exit the loop if no more tokens are available
+        }
+
+        if (((*argvp)[i] = strndup(token, strlen(token))) == NULL) {
+            // Free previously allocated strings on error
+            for (int j = 0; j < i; j++) {
+                free((*argvp)[j]);
+            }
+            free(*argvp);
+            free(tokenized_string);
+            return -1; // Memory allocation failed
+        }
+
+        token = strtok_r(NULL, delimiters, &saveptr);
+    }
+
+    // No need to set (*argvp)[tokens] = NULL; since calloc does this
+    free(tokenized_string);
+    return 0;
+}
+/* }}} */
+
+/**
+ *: make_argv
+ * @brief Parses a string into an array of strings based on delimiters.
+ *
+ * @param input_string  A string to parse.
+ * @param delimiters    A string of delimiters.
+ * @param argvp        An array to store the tokens.
+ *
+ * @return The number of elements in the array, or -1 on error.
+ */
+int make_argv(const char *input_string, const char *delimiters, char ***argvp) {        /* {{{ */
+    int tokens = count_tokens(input_string, delimiters);
+    if (tokens < 0) {
+        *argvp = NULL; // Set the pointer to NULL if there's an error
+        return -1; // Error counting tokens
+    }
+
+    // Allocate memory for the string array
+    if ((*argvp = calloc(tokens + 1, sizeof(char *))) == NULL) {
+        return -1; // Memory allocation failed
+    }
+
+    // Populate the array with tokens
+    if (populate_array(input_string, delimiters, argvp, tokens) < 0) {
+        free(*argvp); // Free allocated memory on error
+        *argvp = NULL; // Set the pointer to NULL
+        return -1; // Error populating the array
+    }
+
+    return tokens; // Return the number of tokens
+}
+/* }}} */
 
 /**
  *: find_config_item
@@ -181,7 +217,6 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
       }
 
       argc = make_argv(str, delimiters, &argv);
-//:~        argc = makeargv(str, delimiters, &argv);
 
       if (argc > 0) {
         config[i].values = argv;
@@ -189,9 +224,6 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
       }
       i++;
     }
-
-    // Set the last element to NULL to act as a sentinel
-    (argv)[i] = NULL;
 
     *count = i;
     fclose(file);
