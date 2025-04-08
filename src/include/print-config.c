@@ -211,7 +211,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 //   1. Check the entries in `value` are not already in
                 //      the config file value array.
                 //   2. Assemble the arrays.
-                char **current_config_array;
+                char **current_config_array = NULL;
                 int argc;
                 int i = 1;
                 if (strstr(value[0], "+") != NULL) {
