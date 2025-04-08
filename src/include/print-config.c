@@ -141,7 +141,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
         AbortTranslation(abortRuntimeError);
     }
 
-    int lines = 0;                                      /* Count the number of lines */
+    int lines = 0;                                      /* Count the number of lines; this will be the return value. */
     char buffer[1024];                                  /* buffer stores the line */
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
@@ -155,11 +155,14 @@ int replacevariable(const char *key, char **value, int count, const char *filena
             if (found != 1) {
                 // Find the position of the separator
                 char *sep_pos = str;
-                int spaces_before = 0;
-                int spaces_after = 0;
-                char separator = '=';
-                char terminator = ' ';
-//:~                  char terminator = 0;
+                int spaces_before = 0;                  /* used to count spaces before seperator */
+                int spaces_after = 0;                   /* used to count spaces after seperator */
+                char separator = ' ';                   /* char to use as a seperator (-i.e., space). */
+                char terminator = ' ';                  /* char to store the terminator symbol if one used. */
+                char quote_char[2] = "";                /* array to store the quotes. */
+                int dquote = 0;                         /* used as a flag when a double quote is found. */
+                int squote = 0;                         /* used as a flag when a single quote is found. */
+                char *value_assembled;                  /* used to store final output string. */
 
                 if (strnstr(str, "=", strlen(str))) separator = '=';
                 if (strnstr(str, ":", strlen(str))) separator = ':';
@@ -174,6 +177,11 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 while (isspace(*sep_pos) && *sep_pos != '\0' && *sep_pos != separator) {
                     spaces_before++;
                     sep_pos++;
+//:~                      switch (*sep_pos) {
+//:~                        case '\t': separator = '\t';
+//:~                                   break;
+//:~                        default : break;
+//:~                      }
                 }
 
                 if (*sep_pos == separator) sep_pos++;
@@ -182,20 +190,21 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 while (*sep_pos != '\0' && isspace(*sep_pos)) {
                     spaces_after++;
                     sep_pos++;
+//:~                      switch (*sep_pos) {
+//:~                        case '\t': separator = '\t';
+//:~                                   break;
+//:~                        default : break;
+//:~                      }
                 }
 
                 // Check if the value is enclosed in quotes
-                int quotes = 0;
                 for (char *p = sep_pos; *p != '\0'; p++) {
-                    if (*p == '"') quotes++;
+                  if (*p == '"' ) dquote++;
+                  if (*p == '\'') squote++;
                 }
+                if (dquote == 2) quote_char[0] = '\"';
+                if (squote == 2) quote_char[0] = '\'';
 
-                char quote_char[2] = "";
-                if (quotes == 2) {
-                    quote_char[0] = '"';
-                }
-
-                char *value_assembled;              /* used to store final output string. */
 
                 // -Check the `value` array for the plus (+) sign;
                 //  if found, then:
@@ -206,8 +215,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 int argc;
                 int i = 1;
                 if (strstr(value[0], "+") != NULL) {
-                  // XXX: make delimiters a global variable which can be referenced here.
-                  char delimiters[] = " \t\n\":=;";
+                  char delimiters[] = " \t\n\"\':=;";
                   // 1. tokenize the buffer,
                   // 2. Add the rest of the values to the token array `current_config_array'
                   // 3. Remove the `key` postion from the `current_config_array` array.
@@ -219,10 +227,13 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 if (strstr(value[0], "-") != NULL) {
-                char **new_config_array = NULL;                                      /* Array used to add only items in current config_array that are not called out to be removed. */
+                char **new_config_array = NULL;         /* Array used to add only items in current config_array
+                                                         * that are not called out to be removed.
+                                                         */
+
                 int new_count = 1;
                   // XXX: make delimiters a global variable which can be referenced here.
-                  char delimiters[] = " \t\n\":=;";
+                  char delimiters[] = " \t\n\"\':=;";
                   argc = make_argv(str, delimiters, &current_config_array);
                   for (; i < argc; i++) {
                     if (count >= 1 && \
@@ -256,13 +267,27 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 // Construct the new line
                 char *ptr = new_line;
-                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
+                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c\n",
+                    key,
+                    spaces_before, "",
+                    separator,
+                    spaces_after, "",
+                    quote_char,
+                    value_assembled,
+                    quote_char,
+                    terminator);
                 // Write the new line to the temp file
                 fputs(new_line, temp_file);
                 fputs("\n", temp_file);
                 free(new_line);
                 free(value_assembled);
-
+                if (current_config_array) {
+                    for (int j = 0; current_config_array[j] != NULL; j++) {
+                        free(current_config_array[j]);  /* Free each string */
+                    }
+                    free(current_config_array);         /* Free the array itself */
+                    current_config_array = NULL;        /* avoid dangling pointer */
+                }
                 free(value);
                 found = 1;
             }
