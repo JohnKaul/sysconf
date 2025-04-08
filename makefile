@@ -17,13 +17,14 @@ sysconf : SOURCES	=	\
 #--------------------------------------------------------------------
 # Set the project directories and build parameters.
 #--------------------------------------------------------------------
-SRCDIR		=	src
+SRCDIR 		= 	src
 DOCDIR		=	doc
 INCDIR		:=	src/include
 
 PREFIX		:=	/usr/local/bin
 
 CC			:=	cc
+#-X- CFLAGS		:=	-fno-exceptions -pipe -Wall -W -g -fsanitize=address
 CFLAGS		:=	-fno-exceptions -pipe -Wall -W
 INCPATH		=	-I $(SRCDIR) -I $(SRCDIR)
 REMOVE		:=	rm -f

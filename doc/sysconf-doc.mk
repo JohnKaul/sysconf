@@ -4,20 +4,20 @@
 # located in the source directory.
 #
 # _target       =       program name
-# _depend       =       required libaries
 # _source       =       source file list
 # ===-------------------------------------------------------------===
 
-#: sysconf
- _target	:= sysconf
- _depend :=
- _source	:= \
- 	doc/sysconf.md
+#-X- #: sysconf
+#-X- _target		:= sysconf.7
+#-X- _docsource	:= \
+#-X-  		doc/sysconf.md
  
- $(eval $(call make-mdoc,$(_target),$(_source)))
-#:~
+#-X- $(eval $(call make-mdoc,$(_target),$(_docsource)))
+#-X- #:~
 
 ## mdoc:
 ## 	@md2mdoc doc/sysconf.md doc/sysconf.7
+
+$(eval $(call make-mdoc,sysconf.7,doc/sysconf.md))
 
 # vim: set noet

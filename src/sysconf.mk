@@ -8,16 +8,25 @@
 # _source       =       source file list
 # ===-------------------------------------------------------------===
 
-#: sysconf
+#-X- #: sysconf
 _target	:= sysconf
-_depend :=
+#-X- _depend :=
 _source	:= \
 	src/main.c \
 	src/abort.c \
 	src/include/parse-config.c \
 	src/include/print-config.c
 
-$(eval $(call make-program,$(_target),$(_source),$(_depend)))
-#:~
+#-X- $(eval $(call make-program,$(_target),$(_source),$(_depend)))
+#-X- #:~
+
+# Add your files here
+#-X- SOURCES = \
+#-X- 	src/main.c \
+#-X- 	src/abort.c \
+#-X- 	src/include/parse-config.c \
+#-X- 	src/include/print-config.c
+
+EXECUTABLE=     $(_target)
 
 # vim: set noet
