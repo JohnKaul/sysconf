@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 
   char *file_string = NULL;                             /* Used to store config file name */
   char *arg_string = NULL;                              /* Used to store the argument string. */
-  char delimiters[] = " \t\n\":=;";
+  char delimiters[] = " \t\n\"\':=;";
 
   /*
   // The following works to parse a config file to find the default configuration file to read.
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
     }
 
     // -If the argument is equal to 'key=value' make a replacement.
-    // -However, if the argument is 'key+=value' make an update.
+    // -However, if the argument is 'key+=value' or 'key-=value' make an update.
     if(arg_count > 1) {
 
       // Count the config_line_array number of elements.
@@ -238,12 +238,11 @@ int main(int argc, char *argv[]) {
         if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
           // update variable...
           printf("%-5s\t- + ->\t%-5s\n", config_line_array[0], arg_array[1]);
-          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
         } else {                                                        /* just a simple = statement */
           // replacing a variable...
           printf("%-5s\t- = ->\t%-5s\n", config_line_array[0], arg_array[1]);
-          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
         }
+        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
       } else {                                                          /* Value found in configuration file already... */
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {  /* Check to see if the user wants a subtraction... */
           printf("%-5s\t- - ->\t%-5s\n", config_line_array[0], arg_array[1]);
