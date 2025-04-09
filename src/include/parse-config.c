@@ -17,7 +17,7 @@
  */
 int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
     if (input_string == NULL || delimiters == NULL) {
-        return -1; // Invalid input
+        return -1;
     }
 
     // Skip leading delimiters
@@ -25,13 +25,13 @@ int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
 
     // Check if stash is empty
     if (*stash == '\0') {
-        return 0; // No tokens found
+        return 0;                                       // No tokens found
     }
 
     // Duplicate the string
     char *tokenized_string = strdup(stash);
     if (tokenized_string == NULL) {
-        return -1; // Memory allocation failed
+        return -1;                                      // Memory allocation failed
     }
 
     char *saveptr;
@@ -65,15 +65,14 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
     const char *stash = input_string + strspn(input_string, delimiters);
     char *tokenized_string = strndup(stash, strlen(stash));
     if (tokenized_string == NULL) {
-        return -1; // Memory allocation failed
+        return -1;
     }
 
     char *saveptr;
     char *token = strtok_r(tokenized_string, delimiters, &saveptr);
     for (int i = 0; i < tokens; i++) {
         if (token == NULL) {
-            // If there are fewer tokens than expected, handle the error
-            break; // Exit the loop if no more tokens are available
+            break;                                      // Exit the loop if no more tokens are available
         }
 
         if (((*argvp)[i] = strndup(token, strlen(token))) == NULL) {
@@ -83,13 +82,12 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
             }
             free(*argvp);
             free(tokenized_string);
-            return -1; // Memory allocation failed
+            return -1;
         }
 
         token = strtok_r(NULL, delimiters, &saveptr);
     }
 
-    // No need to set (*argvp)[tokens] = NULL; since calloc does this
     free(tokenized_string);
     return 0;
 }
@@ -108,23 +106,23 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
 int make_argv(const char *input_string, const char *delimiters, char ***argvp) {        /* {{{ */
     int tokens = count_tokens(input_string, delimiters);
     if (tokens < 0) {
-        *argvp = NULL; // Set the pointer to NULL if there's an error
-        return -1; // Error counting tokens
+        *argvp = NULL;
+        return -1;
     }
 
     // Allocate memory for the string array
     if ((*argvp = calloc(tokens + 1, sizeof(char *))) == NULL) {
-        return -1; // Memory allocation failed
+        return -1;
     }
 
     // Populate the array with tokens
     if (populate_array(input_string, delimiters, argvp, tokens) < 0) {
-        free(*argvp); // Free allocated memory on error
-        *argvp = NULL; // Set the pointer to NULL
-        return -1; // Error populating the array
+        free(*argvp);
+        *argvp = NULL;
+        return -1;
     }
 
-    return tokens; // Return the number of tokens
+    return tokens;
 }
 /* }}} */
 
