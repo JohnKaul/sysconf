@@ -35,8 +35,8 @@
 //      sysconf -f <config_file> [key [ = value]]
 //===-------------------------------------------------------------===
 
-#include "include/parse-config.h"
-#include "include/print-config.h"
+#include "parse-config.h"
+#include "print-config.h"
 #include "abort.h"
 
 #include <stdio.h>

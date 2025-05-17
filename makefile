@@ -4,13 +4,13 @@
 #===--------------------------------------------------------------===
 
 sysconf : HEADERS	=	\
-	src/include/parse-config.h	\
-	src/include/print-config.h	\
+	src/parse-config.h	\
+	src/print-config.h	\
 	src/abort.h
 
 sysconf : SOURCES	=	\
-	src/include/print-config.c	\
-	src/include/parse-config.c	\
+	src/print-config.c	\
+	src/parse-config.c	\
 	src/abort.c	\
 	src/main.c
 
@@ -19,7 +19,6 @@ sysconf : SOURCES	=	\
 #--------------------------------------------------------------------
 SRCDIR 		= 	src
 DOCDIR		=	doc
-INCDIR		:=	src/include
 
 PREFIX		:=	/usr/local/bin
 
@@ -31,7 +30,7 @@ REMOVE		:=	rm -f
 CP			:=	cp
 CTAGS       :=	ctags
 
-#-X- OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(SOURCES:.c=.o)
 #--------------------------------------------------------------------
 # Define the target compile instructions.
 #--------------------------------------------------------------------
@@ -51,7 +50,7 @@ clean:
 
 .PHONY: ctags
 ctags:
-	@$(CTAGS) $(SOURCES) $(INCDIR)/.
+	@$(CTAGS) $(SOURCES) .
 
 .PHONY: cleanobjs
 cleanobjs:
