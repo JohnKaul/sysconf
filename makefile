@@ -21,6 +21,7 @@ SRCDIR 		= 	src
 DOCDIR		=	doc
 
 PREFIX		:=	/usr/local/bin
+MANPATH		:=	/usr/local/share/man/man7
 
 CC			:=	cc
 #-X- CFLAGS		:=	-fno-exceptions -pipe -Wall -W -g -fsanitize=address
@@ -42,7 +43,6 @@ OBJECTS = $(SOURCES:.c=.o)
 sysconf: $(HEADERS) ctags cleanobjs
 	SYSCONF_TARGET='sysconf'
 		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
-		@md2mdoc $(DOCDIR)/sysconf.md $(DOCDIR)/sysconf.7
 
 .PHONY: clean
 clean:
@@ -59,6 +59,12 @@ cleanobjs:
 .PHONY: install
 install:
 	@$(CP) sysconf $(PREFIX)/sysconf
+	@$(CP) ./doc/sysconf.7 $(MANPATH)
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(PREFIX)/sysconf
+	$(RM) $(MANPATH)/sysconf.7
 
 .PHONY: all
 all: sysconf
