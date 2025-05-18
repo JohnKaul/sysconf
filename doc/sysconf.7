@@ -15,13 +15,14 @@ sysconf
 .Bl -tag -width Ds
 .It Fl f
 Configuration file
-.Pp
 .El
 .Pp
 .Sh  DESCRIPTION
-This utility will print/change a configuration value stored in a configuration file formatted in the typical key/value syntax.
+This utility will print and/or change a configuration value stored in a configuration file formatted in the typical key/value syntax with zero dependencies on external libraries or tools.
 .Pp
-By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a temination character and either spaces or an equal sign or colon seperation character).
+By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do, or not to do, based on the arguments given and what is currently in the config file. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+.Pp
+This utility can also add and subtract values to a key with '+=' and '-='.
 .Pp
 Configuration file syntaxes this utility can parse:
 .Bd -literal -offset indent
@@ -37,31 +38,56 @@ Configuration file syntaxes this utility can parse:
 .Ed
 .Pp
 .Sy NOTE
-Some keys or values in configuration files can contain special characters like dollarsigns ($). To pass these types of vaiables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quates (').
+Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these types of variables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quotes (').
 .Pp
+If the configuration file does not already contain the key=value entry this utility will add the entry in the following format.
+.Pp
+.Bd -literal -offset indent
+key = value
+.Ed
+.Pp
+This utility also does not allow for duplicate key/values in the config file, and will not add an entry if it already exists.
 .Pp
 .Sh  EXAMPLES
-To list off some key/values in a config file.
+To list off (prety print) the key/values in a config file.
 .Bd -literal -offset indent
-    syconf -f /path/config.file
+    % syconf -f /path/config.file
 .Ed
 .Pp
 To retrieve the value from a key in a file.
 .Bd -literal -offset indent
-    sysconf -f /path/config.file key
+    % sysconf -f /path/config.file key
 .Ed
+.Sy NOTE
+This utility will only return the value(s) for the given key to better support usage from within a script.
 .Pp
 To change a value associated with a key.
 .Bd -literal -offset indent
-    sysconf -f /path/config.file key=value
+    % sysconf -f /path/config.file key=value
 .Ed
 .Pp
 To add to a value associated with a key.
 .Bd -literal -offset indent
-    sysconf -f /path/config.file key+=value
+    % sysconf -f /path/config.file key+=value
+.Ed
+.Pp
+To remove a value associated with a key.
+.Bd -literal -offset indent
+    % sysconf -f /path/config.file key-=value
 .Ed
 .Pp
 To use a dollar sign in a key, escape it.
 .Bd -literal -offset indent
-    sysconf -f /path/config.file \\$key
+    % sysconf -f /path/config.file \\$key
 .Ed
+.Pp
+or use single quotes.
+.Bd -literal -offset indent
+    % sysconf -f /path/config.file '$key'
+.Ed
+.Pp
+.Sh  HISTORY
+Created for my personal use.
+.Pp
+.Sh  AUTHOR
+John Kaul
