@@ -82,11 +82,11 @@ To use a dollar sign in a key, escape it.
 * Why did I create this? I created this utility because I was attempting
   to use `sysrc` on a jail.conf file when I ran into a roadblock about
   the <dot> used in the key/variable syntax. This lead me down a bit of
-  a rabbit hole before I just convinced myself "It shouldn't be
+  a deeper rabbit hole before I just convinced myself "It shouldn't be
   complicated to edit a 'key/value' file".
 
 * This utility certainly isn't perfect but it works very well for the
-  cases I need. So, if you're reading this and think it sucks, well,
+  cases I need. So, if you're reading this and you think it sucks, well,
   this utility probably isn't for you then. Sorry, this utility does not
   exist to serve all of your config file needs. -i.e., it does not do
   YMAL, XML, JSON, etc., this is for simple key/value type files and can
@@ -95,13 +95,6 @@ To use a dollar sign in a key, escape it.
   all these config file languages because this utility is helping me on
   my servers (no GUI, no desktop, no docker, nothing fancy, just dead
   simple server stuff).
-
-* Is this a tool/push/call to "replace all the YMAL docker files on
-  all Linux based servers"? Nope! In fact, to cut that idea off at the
-  pass; no Linux config file needs wanted. I'm just running BSD based
-  file/media server(s) here (again, dead simple) so I do all my
-  configurations and automation via scripts and/or key/value type
-  configs. 
 
 ## DOWNLOAD INSTRUCTIONS
 
