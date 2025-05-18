@@ -4,34 +4,19 @@
 # This simple script will set options in the makefile.
 
 prefix='$\(HOME\)\/bin'
-buildloc='.'
-Q='QUIET		:=      YES'
 for arg in "$@"; do
     case "$arg" in
     --prefix=*)
         prefix=`echo $arg | sed 's/--prefix=//'`
         ;;
-    --buildlocation=*)
-        buildloc=`echo $arg | sed 's/--buildlocation=//'`
-        ;;
-    --quiet)
-        ;;
-    --verbose)
-        Q='QUIET		:=	NO'
-        ;;
     --help)
         echo 'usage: ./configure [options]'
         echo 'options:'
         echo '  --prefix=<path>: installation prefix (default $(HOME)/bin)'
-        echo '  --buildlocation=<path>: place to build files to (default ".")'
-        echo '  --quiet: turn off make prompts (default)'
-        echo '  --verbose: turn on make prompts'
         echo 'all invalid options are silently ignored'
         exit 0
         ;;
     esac
 done
 sed -i '' "s/^prefix.*/prefix	        :=	$prefix/g" makefile
-sed -i '' "s/^buildlocation.*/buildlocation	        :=	$buildloc/g" makefile
-sed -i '' "s/^QUIET.*/$Q/g" makefile
 echo 'configuration complete, type `make` to build.'
