@@ -243,6 +243,11 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   }
                   value = new_config_array;
                   count = new_count;
+
+                  if (count == 1) {                     /* if the count equals 1, then we've removed all the
+                                                           values, so skip this line. */
+                    continue;
+                  }
                 }
 
                 // Assemble the new value string
