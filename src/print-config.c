@@ -12,13 +12,10 @@
  *: Printconfifile
  * @brief               Iterates the `config_array` and prints the items.
  *
- * ARGS
  * @param config_array  The array to pull data from.
  * @param array_count   The number of items in `config_array`.
  *
  * @return void
- *
- * XXX: Delete function
  */
 void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
