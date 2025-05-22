@@ -38,7 +38,7 @@ Configuration file syntaxes this utility can parse:
 .Ed
 .Pp
 .Sy NOTE
-Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these types of variables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quotes (').
+Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these types of variables to this utility, the dollar sign needs to be escaped with a slash (\\) or the string can be surrounded with single quotes (').
 .Pp
 If the configuration file does not already contain the key=value entry this utility will add the entry in the following format.
 .Pp
@@ -49,39 +49,48 @@ key = value
 This utility also does not allow for duplicate key/values in the config file, and will not add an entry if it already exists.
 .Pp
 .Sh  EXAMPLES
-To list off (prety print) the key/values in a config file.
+.Pp
+.Em LIST ALL VALUE(S)
+.Pp
+.Pp
+To list off (prety print) the key/values in a config file just call the program with no arguments. However, the way this program parses the key/value strings may result in slighlty odd looking results so you should not try to use this utility to remove duplicate key/values.
 .Bd -literal -offset indent
     % syconf -f /path/config.file
 .Ed
 .Pp
-To retrieve the value from a key in a file.
+.Pp
+.Em GET A VALUE
+.Pp
+To retrieve the value from a key in a file call this program with just the key to search for. This utility will only return the value(s) for the given key to better support usage from within a script.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key
 .Ed
-.Sy NOTE
-This utility will only return the value(s) for the given key to better support usage from within a script.
 .Pp
-To change a value associated with a key.
+.Em CHANGE VALUE(S)
+.Pp
+To change a value associated with a key use the equal (=) sign. A change will only be made if the value does not match what is currently in the config file -i.e., if the value to be assigned is alreay the same as it is in the config file, no change is made.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key=value
 .Ed
 .Pp
-To add to a value associated with a key.
+To add to a value associated with a key use a plus-equal (+=). A change will only be added if the value does not alreay exist in the config value string -i.e., if the value to be assigned is alreay part of the config file value, no change is made.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key+=value
 .Ed
 .Pp
-To remove a value associated with a key.
+To remove a value associated with a key use a minus-eual (-=). A change will only be made if the value exists in the config file value string.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key-=value
 .Ed
+.Pp
+.Em ESCAPING CHARS
 .Pp
 To use a dollar sign in a key, escape it.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file \\$key
 .Ed
 .Pp
-or use single quotes.
+or use single quotes to surround the string.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file '$key'
 .Ed
