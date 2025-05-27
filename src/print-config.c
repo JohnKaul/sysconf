@@ -232,6 +232,17 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   // XXX: make delimiters a global variable which can be referenced here.
                   char delimiters[] = " \t\n\"\':=;";
                   argc = make_argv(str, delimiters, &current_config_array);
+
+                  /* If there are only two items in the line, and the
+                   * argument to remove is the same as what is there,
+                   * skip tring to recreate the string for output.
+                   */
+                  if (argc == 2 && \
+                      strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
+                    printf("Last value for key removed. Key removed from file.\n");
+                    continue;
+                  }
+
                   for (; i < argc; i++) {
                     if (count >= 1 && \
                         strncmp(value[1], current_config_array[i], strlen(value[1])) != 0) {
@@ -240,11 +251,6 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   }
                   value = new_config_array;
                   count = new_count;
-
-                  if (count == 1) {                     /* if the count equals 1, then we've removed all the
-                                                           values, so skip this line. */
-                    continue;
-                  }
                 }
 
                 // Assemble the new value string
