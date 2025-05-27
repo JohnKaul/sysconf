@@ -51,6 +51,7 @@ Example configuration file syntaxes this utility can parse/change:
 * Simple syntax - no command flags to remember and consistent syntax no matter the configuration language used.
 * Will not write a key twice - if a key/value already exists, this utility will not write a second entry.
 * Zero dependencies - will not break or fall behind if library is (not) updated.
+* Add or Remove vlues with either '+=' or '-='.
 
 ## EXAMPLES
 To list off some key/values in a config file.
@@ -71,6 +72,11 @@ To change a value associated with a key.
 To add to a value associated with a key.
 ```
     sysconf -f /path/config.file key+=value
+```
+
+To remove a value associated with a key.
+```
+    sysconf -f /path/config.file key-=value
 ```
 
 To use a dollar sign in a key, escape it.
