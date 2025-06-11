@@ -3,7 +3,6 @@
 //
 //: main.c
 //
-// DATE: October 21 2020
 // BY  : John Kaul [john.kaul@outlook.com]
 //
 // DESCRIPTION
@@ -97,13 +96,10 @@ int contains(char **array, int size, const char *value) {       /*{{{*/
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
-  int commentflag = 0;                                  /* Used to determine if
-                                                           in-line comments should
-                                                           be printed. */
-
   char *file_string = NULL;                             /* Used to store config file name */
   char *arg_string = NULL;                              /* Used to store the argument string. */
   char delimiters[] = " \t\n\"\':=;";
+  int ch = 0;                                           /* For getopt() */
 
   /*
   // The following works to parse a config file to find the default configuration file to read.
@@ -121,25 +117,20 @@ int main(int argc, char *argv[]) {
   }
   */
 
-  // -Check the command line arguments.
-  //  if there are not enough arguments, exit.
-  if (argc < 3) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-    AbortTranslation(abortInvalidCommandLineArgs);
-  }
-
-  // TODO: Switch to `getopt()`.
-  for (int i = 0; i < argc; i++) {
-    if (argv[i] && strlen(argv[i]) > 1) {
-      if (argv[i][0] == '-' && argv[i][1] == 'c') { commentflag = 1; }
-      if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
-      if (argv[i][0] != '-') { arg_string = argv[i]; }
+  while ((ch = getopt(argc, argv, "hf:")) != -1) {
+    switch (ch) {
+      case 'f':
+        file_string = optarg;
+        break;
+      case 'h':
+      default:
+        fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
+        exit(1);
     }
   }
 
   // -If there is not a `file_string` variable, quit.
   if (! file_string) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
@@ -213,11 +204,6 @@ int main(int argc, char *argv[]) {
       // Itterate the array and print chars.
       config_line_array += 1;                           /* strip the 'key' from the array */
       while(*config_line_array) {
-        if(commentflag == 0) {
-          if(memcmp(*config_line_array, "#", 1) == 0) {
-            break;
-          }
-        }
         printf("%s ", *config_line_array++);
       }
       printf("\n");
