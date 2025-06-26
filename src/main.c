@@ -99,7 +99,6 @@ int main(int argc, char *argv[]) {
   char *file_string = NULL;                             /* Used to store config file name */
   char *arg_string = NULL;                              /* Used to store the argument string. */
   char delimiters[] = " \t\n\"\':=;";
-  int ch = 0;                                           /* For getopt() */
 
   /*
   // The following works to parse a config file to find the default configuration file to read.
@@ -117,20 +116,24 @@ int main(int argc, char *argv[]) {
   }
   */
 
-  while ((ch = getopt(argc, argv, "hf:")) != -1) {
-    switch (ch) {
-      case 'f':
-        file_string = optarg;
-        break;
-      case 'h':
-      default:
-        fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-        exit(1);
+  // -Check the command line arguments.
+  //  if there are not enough arguments, exit.
+  if (argc < 3) {
+    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
+    AbortTranslation(abortInvalidCommandLineArgs);
+  }
+
+  // -Parse the command line options.
+  for (int i = 0; i < argc; i++) {
+    if (argv[i] && strlen(argv[i]) > 1) {
+      if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
+      if (argv[i][0] != '-') { arg_string = argv[i]; }
     }
   }
 
   // -If there is not a `file_string` variable, quit.
   if (! file_string) {
+    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
