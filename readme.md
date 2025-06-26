@@ -42,16 +42,16 @@ Example configuration file syntaxes this utility can parse/change:
 ```
 
 *NOTE*:
-- Some keys or values in configuration files can contain special characters like dollarsigns ($). To pass these types of variables to this utility, the dollar sign needs to be escaped with a slash (\\) or surrounded with single quotes (').
-- This utility will not be able to read multi-line configuration values.
-- This utility will not be able to locate configuration keys in "sections". For example, if your configuration file (like an .htaccess file for Apache) contains multiple entries with the same key in separate sections.
-- This utility was not meant to replace the use of a text editor; it is only meant to offer simple(er) changes via scripting/automation.
+- Keys or values can contain special characters like dollarsigns ($). To pass these characters to this utility, the dollar sign must be escaped with a slash (\\) or surrounded with single quotes (').
+- This utility cannot read multi-line configuration values.
+- This utility cannot locate configuration keys in "sections". For example, if your configuration file (like an .htaccess file for Apache) contains multiple entries with the same key in separate sections.
+- This utility was not meant to replace a text editor; it is meant to offer simple(er) changes via scripting/automation.
 
 ## FEATURES
 * Simple syntax - no command flags to remember and consistent syntax no matter the configuration language used.
 * Will not write a key twice - if a key/value already exists, this utility will not write a second entry.
 * Zero dependencies - will not break or fall behind if library is (not) updated.
-* Add or Remove vlues with either '+=' or '-='.
+* Add or Remove values with either '+=' or '-='.
 
 ## EXAMPLES
 To list off some key/values in a config file.
