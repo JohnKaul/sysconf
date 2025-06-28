@@ -226,15 +226,28 @@ int main(int argc, char *argv[]) {
       if (contains(config_line_array, i, arg_array[1]) == 0) {          /* if the value already exists... */
         if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
           // update variable...
-          printf("%-5s\t- + ->\t%-5s\n", config_line_array[0], arg_array[1]);
+          printf("%s: ", config_line_array[0]);
+          config_line_array += 1;                                       /* strip the 'key' from the array */
+          printf("%s -> %s %s\n", *config_line_array, arg_array[1], *config_line_array);
+          config_line_array = get_value(config_array, config_count, arg_array[0]);
         } else {                                                        /* just a simple = statement */
           // replacing a variable...
-          printf("%-5s\t- = ->\t%-5s\n", config_line_array[0], arg_array[1]);
+          printf("%s: %s -> %-5s\n", config_line_array[0], config_line_array[1], arg_array[1]);
         }
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
       } else {                                                          /* Value found in configuration file already... */
-        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {  /* Check to see if the user wants a subtraction... */
-          printf("%-5s\t- - ->\t%-5s\n", config_line_array[0], arg_array[1]);
+        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* Check to see if the user wants a subtraction... */
+          printf("%s: ", config_line_array[0]);
+          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
+            printf("%s ", config_line_array[i]);
+          }
+          printf("-> ");
+          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
+            if(strncmp(config_line_array[i], arg_array[1], strlen(arg_array[1])) != 0) {
+              printf("%s", config_line_array[i]);
+            }
+          }
+          printf("\n");
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
         } else {
         printf("Value found. No change made.\n");
@@ -244,7 +257,6 @@ int main(int argc, char *argv[]) {
         free_config(config_array, config_count);
         return 0;
       }
-
     }   /* end_ if(arg_count > 1)  */
   }     /* end_ if(arg_count >= 1) */
 
