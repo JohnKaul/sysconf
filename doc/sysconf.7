@@ -7,14 +7,22 @@
 .Nm sysconf
 .Pp
 .Sh SYNOPSIS
-sysconf
-.Op Fl f Ar configfile
-.Op  Ar key=value
+sysconf -f configfile
+.Pp
+sysconf -f configfile [-n] [key]
+.Pp
+sysconf -f configfile [-n] [key=value]
+.Pp
+sysconf -f configfile [-n] [key+=value]
+.Pp
+sysconf -f configfile [-n] [key-=value]
 .Pp
 .Sh OPTIONS
 .Bl -tag -width Ds
 .It Fl f
 Configuration file
+.It Fl n
+Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 .El
 .Pp
 .Sh DESCRIPTION
@@ -66,6 +74,11 @@ To retrieve the value from a key in a file call this program with just the key t
     % sysconf -f /path/config.file key
 .Ed
 .Pp
+If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
+.Bd -literal -offset indent
+    % sysconf -f /path/config.file -n key
+.Ed
+.Pp
 .Em CHANGE VALUE(S)
 .Pp
 To change a value associated with a key use the equal (=) sign. A change will only be made if the value does not match what is currently in the config file -i.e., if the value to be assigned is already the same as it is in the config file, no change is made.
@@ -99,5 +112,4 @@ or use single quotes to surround the string.
 Created for my personal use.
 .Pp
 .Sh AUTHOR
-John Kaul
 John Kaul
