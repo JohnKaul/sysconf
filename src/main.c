@@ -99,6 +99,7 @@ int main(int argc, char *argv[]) {
   char *file_string = NULL;                             /* Used to store config file name */
   char *arg_string = NULL;                              /* Used to store the argument string. */
   char delimiters[] = " \t\n\"\':=;";
+  int keyvalue_output = 0;
 
   /*
   // The following works to parse a config file to find the default configuration file to read.
@@ -127,6 +128,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     if (argv[i] && strlen(argv[i]) > 1) {
       if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
+      if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
       if (argv[i][0] != '-') { arg_string = argv[i]; }
     }
   }
@@ -205,6 +207,9 @@ int main(int argc, char *argv[]) {
     //  config and display the value set.
     if(config_line_array != NULL && arg_count == 1) {
       // Itterate the array and print chars.
+      if (keyvalue_output != 0) {
+        printf("%s: ", config_line_array[0]);
+      }
       config_line_array += 1;                           /* strip the 'key' from the array */
       while(*config_line_array) {
         printf("%s ", *config_line_array++);
