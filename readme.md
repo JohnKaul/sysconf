@@ -14,10 +14,19 @@ A utility to make changes to key/value type system configuration
 files.
 
 ## SYNOPSIS
-sysconf -f configfile [key=value]
+sysconf -f configfile
+
+sysconf -f configfile [-n] [key]
+
+sysconf -f configfile [-n] [key=value]
+
+sysconf -f configfile [-n] [key+=value]
+
+sysconf -f configfile [-n] [key-=value]
 
 ## OPTIONS
 -f      Configuration file
+-n      Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 
 ## DESCRIPTION
 This utility will print/change a configuration value stored in a configuration file formatted in a simple key/value syntax.
@@ -62,6 +71,11 @@ To list off some key/values in a config file.
 To retrieve the value from a key in a file.
 ```
     sysconf -f /path/config.file key
+```
+
+If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
+```
+    % sysconf -f /path/config.file -n key
 ```
 
 To change a value associated with a key.
