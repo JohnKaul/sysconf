@@ -26,6 +26,7 @@ sysconf -f configfile [-n] [key-=value]
 
 ## OPTIONS
 -f      Configuration file
+
 -n      Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 
 ## DESCRIPTION
