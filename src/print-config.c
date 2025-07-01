@@ -324,8 +324,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
  */
 int writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
   FILE* conf_file = fopen(filename, "a");
-  int spaces_before = 1;
-  int spaces_after = 1;
+  int spaces_before = 0;
+  int spaces_after = 0;
   char separator = '=';
   char terminator = ' ';
 //:~    char terminator = 0;
