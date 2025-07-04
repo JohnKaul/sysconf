@@ -14,8 +14,6 @@
  *
  * @param config_array  The array to pull data from.
  * @param array_count   The number of items in `config_array`.
- *
- * @return void
  */
 void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
@@ -44,11 +42,14 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
 
 /**
  *: add_to_array
- * @brief               appends `string` to the end of `argvp`.
+ * @brief               Appends a char array (aka: `string`) to the
+ *                      end of an array of pointers (aka: `argvp`).
  *
  * @param ***argvp      An array to store the array into.
  * @param size          number of elements in `argvp`.
  * @param string        The string to append to `argvp`.
+ *
+ * @return int          New size of array.
  */
 int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
     // Reallocate memory for the new size of the array
@@ -71,15 +72,16 @@ int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
 
 /**
  *: assemble_strings
- * @brief               This function assebles the array of char
+ * @brief               This function assebles an array of char
  *                      arrays into a string (ommiting the first char
  *                      array which should be the 'key' in a key/value
  *                      string).
- *
- * @param value         The array to assemble (the first entry is
- *                      assumed to be an unwanted entry and is
- *                      skipped).
+ * @param value         The array to assemble.
+ *                      NOTE: the first entry is assumed to be an
+ *                            unwanted entry and is skipped.
  * @param count         The number of elements in the array.
+ *
+ * @return char*        Assembled char array.
  */
 char* assemble_strings(char **value, int count) {       /*{{{*/
     // Calculate the total length needed
@@ -109,8 +111,8 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
 
         // Add a space if it's not the last string
         if (i < count - 1) {
-            *ptr = ' ';                                 /* Add a space */
-            ptr++;                                      /* Move the pointer forward */
+            *ptr = ' ';
+            ptr++;
         }
     }
 
@@ -128,6 +130,8 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
  * @param value         The value (array) in the key/value array.
  * @param count         The value array count.
  * @param filename      The config file to change.
+ *
+ * @return int          The number of lines in config file.
  */
 int replacevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
     FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
@@ -160,6 +164,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 int dquote = 0;                         /* used as a flag when a double quote is found. */
                 int squote = 0;                         /* used as a flag when a single quote is found. */
                 char *value_assembled;                  /* used to store final output string. */
+                int comment = 0;                        /* used a a flag when an inline comment is found. */
+                int comment_pos = 0;                    /* used as a starting point in a loop counter to
+                                                           add any inline comments back to string. */
 
                 if (strnstr(str, "=", strlen(str))) separator = '=';
                 if (strnstr(str, ":", strlen(str))) separator = ':';
@@ -202,7 +209,6 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 if (dquote == 2) quote_char[0] = '\"';
                 if (squote == 2) quote_char[0] = '\'';
 
-
                 // -Check the `value` array for the plus (+) sign;
                 //  if found, then:
                 //   1. Check the entries in `value` are not already in
@@ -219,6 +225,14 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   // 4. Replace the `value` array with the new array `current_config_array`.
                   argc = make_argv(str, delimiters, &current_config_array);
                   for (; i < argc; i++) {
+
+                    // Do not add any "inline comments".
+                    if(memcmp(current_config_array[i], "#", 1) == 0) {
+                      comment = 1;
+                      comment_pos = i;
+                      break;
+                    }
+
                     count = add_to_array(&value, count, current_config_array[i]);
                   }
                 }
@@ -246,6 +260,14 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   for (; i < argc; i++) {
                     if (count >= 1 && \
                         strncmp(value[1], current_config_array[i], strlen(value[1])) != 0) {
+
+                      // Do not add any "inline comments".
+                      if(memcmp(current_config_array[i], "#", 1) == 0) {
+                        comment = 1;
+                        comment_pos = i;
+                        break;
+                      }
+
                       new_count = add_to_array(&new_config_array, new_count, current_config_array[i]);
                     }
                   }
@@ -286,6 +308,16 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     terminator);
                 // Write the new line to the temp file
                 fputs(new_line, temp_file);
+
+                // Add any inline comments back into the string.
+                if (comment != 0) {
+                    fputs("     ", temp_file);
+                    for (int j = comment_pos; current_config_array[j] != NULL; j++) {
+                        fputs(current_config_array[j], temp_file);
+                        fputs(" ", temp_file);
+                    }
+                }
+
                 fputs("\n", temp_file);
                 free(new_line);
                 free(value_assembled);
@@ -322,13 +354,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
  * @param count         The value array count.
  * @param filename      The config file to change.
  */
-int writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
+void writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
   FILE* conf_file = fopen(filename, "a");
   int spaces_before = 0;
   int spaces_after = 0;
   char separator = '=';
   char terminator = ' ';
-//:~    char terminator = 0;
 
   char quote_char[2] = "";
   quote_char[0] = '"';
@@ -339,6 +370,5 @@ int writevariable(const char *key, char **value, int count, const char *filename
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
 
   fclose(conf_file);
-  return 0;
 }
 /*}}}*/
