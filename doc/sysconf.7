@@ -11,11 +11,11 @@ sysconf -f configfile
 .Pp
 sysconf -f configfile [-n] [key]
 .Pp
-sysconf -f configfile [-n] [key=value]
+sysconf -f configfile [key=value]
 .Pp
-sysconf -f configfile [-n] [key+=value]
+sysconf -f configfile [key+=value]
 .Pp
-sysconf -f configfile [-n] [key-=value]
+sysconf -f configfile [key-=value]
 .Pp
 .Sh OPTIONS
 .Bl -tag -width Ds
@@ -48,10 +48,10 @@ Configuration file syntaxes this utility can parse:
 .Sy NOTE
 Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these characters to this utility, the dollar sign must be escaped with a slash (\\) or the string can be surrounded with single quotes (').
 .Pp
-If the configuration file does not already contain the key=value entry this utility will add the entry in the following format.
+If the configuration file does not already contain the key=value entry this utility will add the entry in the following format (the deffault syntax for rc.conf).
 .Pp
 .Bd -literal -offset indent
-key = value
+key="value"
 .Ed
 .Pp
 This utility also does not allow for duplicate key/values in the config file, and will not add an entry if it already exists.

@@ -18,11 +18,11 @@ sysconf -f configfile
 
 sysconf -f configfile [-n] [key]
 
-sysconf -f configfile [-n] [key=value]
+sysconf -f configfile [key=value]
 
-sysconf -f configfile [-n] [key+=value]
+sysconf -f configfile [key+=value]
 
-sysconf -f configfile [-n] [key-=value]
+sysconf -f configfile [key-=value]
 
 ## OPTIONS
 -f      Configuration file
