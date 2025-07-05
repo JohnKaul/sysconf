@@ -259,7 +259,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                   for (; i < argc; i++) {
                     if (count >= 1 && \
-                        strncmp(value[1], current_config_array[i], strlen(value[1])) != 0) {
+                        strncmp(value[1], current_config_array[i], strlen(current_config_array[i])) != 0) {
 
                       // Do not add any "inline comments".
                       if(memcmp(current_config_array[i], "#", 1) == 0) {
