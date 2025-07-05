@@ -212,6 +212,8 @@ int main(int argc, char *argv[]) {
       }
       config_line_array += 1;                           /* strip the 'key' from the array */
       while(*config_line_array) {
+        if (memcmp(*config_line_array, "#", 1) == 0)
+          break;
         printf("%s ", *config_line_array++);
       }
       printf("\n");
