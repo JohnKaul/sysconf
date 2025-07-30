@@ -130,7 +130,7 @@ void print_config_item(config_t *config, int count, const char *name);
 
 //: find_config_item
 //      A function to find a configuration value given a name.
-config_t* find_config_item(config_t* config, const char* name, int count);
+int find_config_item(char **array, int size, const char *value);
 
 //: count_tokes
 //      Counts the number of tokens in the input string based on the delimiters.

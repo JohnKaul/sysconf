@@ -128,23 +128,20 @@ int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
 
 /**
  *: find_config_item
- * @brief               A function to find a configuration
- *                      value given a name.
+ * @brief               This procedure will search and array for a given value.
  *
- * @param config        A pointer to the configuration data.
- * @param count         The number of configuration entries.
- * @param name          The name of the value to retrieve.
+ * @param array         An array of char arrays to search.
+ * @param value         A char array to search for.
  *
- * @return config_t*    A pointer to the parsed configuration data, or
- *                      NULL on error.
+ * @returns 0 = Not found. 1 = Item found.
  */
-config_t* find_config_item(config_t* config, const char* name, int count) {     /*{{{*/
-    for (int i = 0; i < count; i++) {
-        if (strcmp(config[i].values[0], name) == 0) {
-            return &config[i];
+int find_config_item(char **array, int size, const char *value) {       /*{{{*/
+    for (int i = 0; i < size; i++) {
+        if (strcmp(array[i], value) == 0) {
+            return 1; // Found
         }
     }
-    return NULL;
+    return 0; // Not found
 }
 /*}}}*/
 
@@ -289,3 +286,4 @@ void free_config(config_t *config, int count) {/*{{{*/
 //:~        free(config[count--].values);
 //:~      }
 }/*}}}*/
+
