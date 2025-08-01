@@ -39,7 +39,7 @@ The current tool(s) in FreeBSD (`sysrc`) can be made to work on other files othe
 By design this utility does not have many flags/options to specify actions to preform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
 
 Example configuration file syntaxes this utility can parse/change:
-```
+```conf
     key=value
     key = value;
     key.subkey = value;
@@ -65,37 +65,37 @@ Example configuration file syntaxes this utility can parse/change:
 
 ## EXAMPLES
 To list off some key/values in a config file.
-```
+```sh
     syconf -f /path/config.file
 ```
 
 To retrieve the value from a key in a file.
-```
+```sh
     sysconf -f /path/config.file key
 ```
 
 If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
-```
-    % sysconf -f /path/config.file -n key
+```sh
+    sysconf -f /path/config.file -n key
 ```
 
 To change a value associated with a key.
-```
+```sh
     sysconf -f /path/config.file key=value
 ```
 
 To add to a value associated with a key.
-```
+```sh
     sysconf -f /path/config.file key+=value
 ```
 
 To remove a value associated with a key.
-```
+```sh
     sysconf -f /path/config.file key-=value
 ```
 
 To use a dollar sign in a key, escape it.
-```
+```sh
     sysconf -f /path/config.file \\$key
 ```
 
@@ -121,17 +121,26 @@ To use a dollar sign in a key, escape it.
 
 To clone a copy:
 
-```bash
-$ cd ~/<place>/<you>/<keep>/<your>/<code>
-$ git clone git@git.local:server/sysconf.git
+```sh
+    $ cd ~/<place>/<you>/<keep>/<your>/<code>
+    $ git clone git@git.local:server/sysconf.git
 ```
 
 ## BUILD INSTRUCTIONS
 
-```bash
-$ cd sysconf
-$ make
+```sh
+    $ cd sysconf
+    $ make
+    $ doas make install
 ```
+
+This project also has some unit testing which can be compiled and run.
+
+```sh
+    $ cd sysconf
+    $ make test
+```
+This will compile a file called `test_sysconf`.
 
 ## CONTRIBUTION GUIDELINES
 
