@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 
       // -Determine if we have a change to make; compare the `arg_array`
       //  and the `config_array` values.
-      if (find_config_item(config_line_array, i, arg_array[1]) == 0) {          /* 0 = value not fount... */
+      if (contains(config_line_array, i, arg_array[1]) == 0) {          /* 0 = value not fount... */
 
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* if the user wants to subtract a value
                                                                            but the value was not found so exit. */
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
-      } else if(find_config_item(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
+      } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {/* Check if the user wants a subtraction... */
           printf("%s: ", config_line_array[0]);
 
