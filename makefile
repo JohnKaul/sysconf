@@ -12,7 +12,16 @@ sysconf : SOURCES	=	\
 	src/print-config.c	\
 	src/parse-config.c	\
 	src/abort.c	\
-	src/main.c
+	src/sysconf.c
+
+TEST_HEADERS	=	\
+	test/minunit.h
+
+TEST_SOURCES	=	\
+	src/print-config.c	\
+	src/parse-config.c	\
+	src/abort.c	\
+	test/test_sysconf.c
 
 #--------------------------------------------------------------------
 # Set the project directories and build parameters.
@@ -43,6 +52,11 @@ OBJECTS = $(SOURCES:.c=.o)
 sysconf: $(HEADERS) ctags cleanobjs
 	SYSCONF_TARGET='sysconf'
 		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
+
+.PHONY: test
+test: $(HEADERS) $(TEST_HEADERS)
+	TEST='test_sysconf'
+		@$(CC) $(CFLAGS) -I test $(INCPATH) -o test_sysconf $(TEST_SOURCES)
 
 .PHONY: clean
 clean:
