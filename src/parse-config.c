@@ -135,9 +135,32 @@ int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
  *
  * @returns 0 = Not found. 1 = Item found.
  */
-int find_config_item(char **array, int size, const char *value) {       /*{{{*/
+config_t* find_config_item(config_t* config, const char* name, int count) {       /*{{{*/
+  for (int i = 0; i < count; i++) {
+    if (config[i].values != NULL && \
+        config[i].values[0] != NULL) {
+      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+        return &config[i];
+      }
+    }
+  }
+  return NULL;
+}
+/*}}}*/
+
+/**
+ *: contains
+ * @brief               This procedure will search and array for a given value.
+ *
+ * @param array         An array of char arrays to search.
+ * @param size          Tthe number of array elements.
+ * @param value         A char array to search for.
+ *
+ * @returns 0 = Not found. 1 = Item found.
+ */
+int contains(char **array, int size, const char *value) {       /*{{{*/
     for (int i = 0; i < size; i++) {
-        if (strcmp(array[i], value) == 0) {
+        if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
             return 1; // Found
         }
     }
