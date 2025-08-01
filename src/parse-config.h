@@ -130,7 +130,7 @@ void print_config_item(config_t *config, int count, const char *name);
 
 //: find_config_item
 //      A function to find a configuration value given a name.
-config_t* find_config_item_two(config_t* config, const char* name, int count);
+config_t* find_config_item(config_t* config, const char* name, int count);
 
 //: contains
 //      A function to find a value in a char array.
