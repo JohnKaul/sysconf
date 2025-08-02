@@ -9,6 +9,8 @@
 .Sh SYNOPSIS
 sysconf -f configfile
 .Pp
+sysconf -f configfile -d configfile.defaults
+.Pp
 sysconf -f configfile [-n] [key]
 .Pp
 sysconf -f configfile [key=value]
@@ -21,18 +23,21 @@ sysconf -f configfile [key-=value]
 .Bl -tag -width Ds
 .It Fl f
 Configuration file
+.It Fl d
+Check the `configfile`'s key values against `configfile.defaults`'s key
+values for duplicate entries.
 .It Fl n
 Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 .El
 .Pp
 .Sh DESCRIPTION
-This utility will print and/or change a configuration value stored in a configuration file formatted in the typical key/value syntax with zero dependencies on external libraries or tools.
+This utility will 'get' (-i.e., print to stdout) and/or 'set' (i.e., change) a key/value value stored in a configuration file formatted in the typical key/value syntax with zero dependencies on external libraries or tools. There are several popular key/value styles different programs and tools can use so this utility was designed to tokenize several.
 .Pp
-By design this utility does not have any flags to specify actions to preform different actions, instead this utility will determine what to do, or not to do, based on the arguments given and what is currently in the config file. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e. it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+By design this utility does not have any flags to specify actions to preform different actions, instead this utility will try to determine what to do, or not to do, based on the arguments given and what is currently in the config file. See the examples below. During a 'set' operation, this utility will also try to determine the syntax of the key/value pair, to be changed, by reading the key/value string (-e.g. based on the key/value being changed, sysconf will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
 .Pp
 This utility can also add and subtract values to a key with '+=' and '-='.
 .Pp
-Configuration file syntaxes this utility can parse:
+Example configuration file syntaxes this utility can 'get' and 'set'.
 .Bd -literal -offset indent
     key=value
     key = value;
@@ -48,35 +53,38 @@ Configuration file syntaxes this utility can parse:
 .Sy NOTE
 Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these characters to this utility, the dollar sign must be escaped with a slash (\\) or the string can be surrounded with single quotes (').
 .Pp
-If the configuration file does not already contain the key=value entry this utility will add the entry in the following format (the deffault syntax for rc.conf).
+If the configuration file does not already contain the key/value entry when a call to 'set' is made, this utility will add the new entry, at the bottom of the file, in the following format (which is also the default syntax for rc.conf key/values).
 .Pp
 .Bd -literal -offset indent
 key="value"
 .Ed
 .Pp
-This utility also does not allow for duplicate key/values in the config file, and will not add an entry if it already exists.
+This utility does not allow/account for duplicate key/value entries in the 'get' and 'set' stages. The files first key/value entry found durring a 'get' is returned and the files first key/value entry is written to the 'set' stage (the second--duplicate--key/value is not written).
+.Pp
+It is also possible to check a configuration file's key/values against a default configuration file which will search for duplicate values in keys listed in the configuration file. For example, in FreeBSD the /etc/rc.conf file is included from the file /etc/defaults/rc.conf, which specifies the default settings for all the available options.  Options need only be specified in /etc/rc.conf when the system administrator wishes to override these defaults. See the example section below for 'checking for duplicates'.
+.Pp
 .Pp
 .Sh EXAMPLES
 .Pp
 .Em LIST ALL VALUE(S)
-.Pp
 .Pp
 To list off (pretty print) the key/values in a config file just call the program with no arguments. However, the way this program parses the key/value strings may result in slightly odd looking results so you should not try to use this utility to remove duplicate key/values.
 .Bd -literal -offset indent
     % syconf -f /path/config.file
 .Ed
 .Pp
-.Pp
 .Em GET A VALUE
 .Pp
 To retrieve the value from a key in a file call this program with just the key to search for. This utility will only return the value(s) for the given key to better support usage from within a script.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key
+    % value
 .Ed
 .Pp
 If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file -n key
+    % key: value
 .Ed
 .Pp
 .Em CHANGE VALUE(S)
@@ -91,7 +99,7 @@ To add to a value associated with a key use a plus-equal (+=). A change will onl
     % sysconf -f /path/config.file key+=value
 .Ed
 .Pp
-To remove a value associated with a key use a minus-equal (-=). A change will only be made if the value exists in the config file value string.
+To remove a value associated with a key use a minus-equal (-=). A change will only be made if the value exists in the config file value string. And when the last value for the given key is called out to be removed the key will also be removed from the file.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key-=value
 .Ed
@@ -106,6 +114,13 @@ To use a dollar sign in a key, escape it.
 or use single quotes to surround the string.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file '$key'
+.Ed
+.Pp
+.Em CHECKING FOR DUPLICATES
+.Pp
+To search for duplicate values in a configuration file against a default configuration file key values, use the -f and -d flags.
+.Bd -literal -offset indent
+    % sysconf -f /path/config.file -d /path/config.file.defaults
 .Ed
 .Pp
 .Sh HISTORY
