@@ -29,9 +29,22 @@
 // Will display the config_file key's value.
 //      % sysconf -f <config_file> key=value
 // Will change the config_file value to the value specified as an argument.
+//      % sysconf -f <config_file> -d <defaults_config_file>
+// Will check for duplicate value entries for each key in the config_file against the
+// defaults_config_file.
 //
 // SYNOPSYS
-//      sysconf -f <config_file> [key [ = value]]
+//      sysconf -f configfile
+//
+//      sysconf -f configfile -d configfile.defaults
+//
+//      sysconf -f configfile [-n] [key]
+//
+//      sysconf -f configfile [key=value]
+//
+//      sysconf -f configfile [key+=value]
+//
+//      sysconf -f configfile [key-=value]
 //===-------------------------------------------------------------===
 
 #include "parse-config.h"
@@ -58,45 +71,14 @@ const char program_version[] = "0.0.1";
 //
 // RETURN
 //  int
-//
-// TODO
-// 1. Add a "default value check" where, when just listing out the
-//    values a default file is also parsed and the 'configfile' and
-//    the 'default_configfile' is checked. Any duplicates in the
-//    'configfile' promps a notice to remove duplicate.
-//      a. This can be done with the use of a `sysconf.config` file
-//         (possibly located at: ~/.config/sysconf/defaults.conf) where
-//         configutation files and their defaults are listed.
-//          EX:
-//              # USER                    DEFAULT
-//              # --------------------------------------------------
-//              /etc/rc.conf            = /etc/defaults/rc.conf
-//              /etc/sysctl.conf        =
-//              /etc/jail.conf.d/*.conf = /etc/jail.conf
-//      b. This will be a problem for the jail.conf file entry.
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
   char *file_string = NULL;                             /* Used to store config file name */
+  char *default_string = NULL;                          /* Used to store default config file name. */
   char *arg_string = NULL;                              /* Used to store the argument string. */
   char delimiters[] = " \t\n\"\':=;";
   int keyvalue_output = 0;
-
-  /*
-  // The following works to parse a config file to find the default configuration file to read.
-  int my_config_count = 0;
-  config_t* my_config_array = parse_config("./sysconf.conf", &my_config_count, delimiters);
-  char **defaultconfig_line_array = get_value(my_config_array, my_config_count, "defaultconfig");
-
-  if (defaultconfig_line_array) {
-    file_string = defaultconfig_line_array[1];
-
-    int config_count = 0;
-    config_t* config_array = parse_config(file_string, &config_count, delimiters);
-
-    printconfigfile(config_array, config_count);
-  }
-  */
 
   // -Check the command line arguments.
   //  if there are not enough arguments, exit.
@@ -109,6 +91,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     if (argv[i] && strlen(argv[i]) > 1) {
       if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
+      if (argv[i][0] == '-' && argv[i][1] == 'd') { default_string = argv[++i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
       if (argv[i][0] != '-') { arg_string = argv[i]; }
     }
@@ -133,6 +116,38 @@ int main(int argc, char *argv[]) {
     free(config_array);
     return 1;
   }
+
+  if (default_string != NULL) {         /* We are going to check the config file for
+                                         * duplicates against a defaults config file.
+                                         */
+    int default_count = 0;
+    config_t* default_array = parse_config(default_string, &default_count, delimiters);
+
+    if (!default_array) {
+      printf("Failed to parse the configuration file.\n");
+      free(config_array);
+      free(default_array);
+      return 1;
+    }
+
+    for (int i = 0; i < config_count; i++) {
+      if (config_array[i].values != NULL && config_array[i].values[0] != NULL) {
+        char* key = config_array[i].values[0];
+        config_t* temp_conf = find_config_item(config_array, key, config_count);
+        config_t* temp_default = find_config_item(default_array, key, default_count);
+        if (temp_default != NULL) {
+          for (int x = 1; x < config_array[i].value_count; x++) {
+            char* value = temp_conf->values[x];
+            if (memcmp(value, "#", 1) == 0)
+              break;
+            if (contains(temp_default->values, temp_default->value_count, value) == 1)
+              printf("*DUPLICATE* %s: '%s'\n", key, value);
+          }
+        }
+      }
+    }
+    return 0;
+  }     /* end_ if(default_string) */
 
   // -No argument (key = value or key) given so just
   //  print the config values.
