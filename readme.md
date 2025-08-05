@@ -16,6 +16,8 @@ files.
 ## SYNOPSIS
 sysconf -f configfile
 
+sysconf -f configfile -d configfile.defaults
+
 sysconf -f configfile [-n] [key]
 
 sysconf -f configfile [key=value]
@@ -26,6 +28,8 @@ sysconf -f configfile [key-=value]
 
 ## OPTIONS
 -f      Configuration file
+
+-d      Check the `configfile`'s key values against `configfile.defaults`'s key values for duplicate entries.
 
 -n      Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 
@@ -57,11 +61,15 @@ Example configuration file syntaxes this utility can parse/change:
 - This utility cannot locate configuration keys in "sections". For example, if your configuration file (like an .htaccess file for Apache) contains multiple entries with the same key in separate sections.
 - This utility was not meant to replace a text editor; it is meant to offer simple(er) changes via scripting/automation.
 
+It is also possible to check a configuration file's key/values against a default configuration file which will search for duplicate values in keys listed in the configuration file. For example, in FreeBSD the /etc/rc.conf file is included from the file /etc/defaults/rc.conf, which specifies the default settings for all the available options.  Options need only be specified in /etc/rc.conf when the system administrator wishes to override these defaults. See the example section below for 'checking for duplicates'.
+
+
 ## FEATURES
 * Simple syntax - no command flags to remember and consistent syntax no matter the configuration language used.
 * Will not write a key twice - if a key/value already exists, this utility will not write a second entry.
 * Zero dependencies - will not break or fall behind if library is (not) updated.
 * Add or Remove values with either '+=' or '-='.
+* Check config file's key values against a default config file's default key values.
 
 ## EXAMPLES
 To list off some key/values in a config file.
@@ -97,6 +105,15 @@ To remove a value associated with a key.
 To use a dollar sign in a key, escape it.
 ```sh
     sysconf -f /path/config.file \\$key
+```
+
+To search for duplicate values in a configuration file against a default configuration file key values, use the -f and -d flags.
+```sh
+    % sysconf -f /path/config.file -d /path/config.file.defaults
+```
+_Real World Example_:
+```sh
+    % sysconf -f /etc/rc.conf -d /etc/defaults/rc.conf
 ```
 
 ## WHY?
