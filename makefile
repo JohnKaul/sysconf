@@ -40,6 +40,11 @@ REMOVE		:=	rm -f
 CP			:=	cp
 CTAGS       :=	ctags
 
+# for BSD
+HASH_VERSION:sh	= git rev-parse --short=7 HEAD
+# for GNU (ignored by non-gmake versions)
+HASH_VERSION 	?= $(shell git rev-parse --short=7 HEAD)
+
 OBJECTS = $(SOURCES:.c=.o)
 #--------------------------------------------------------------------
 # Define the target compile instructions.
@@ -51,7 +56,9 @@ OBJECTS = $(SOURCES:.c=.o)
 
 sysconf: $(HEADERS) ctags cleanobjs
 	SYSCONF_TARGET='sysconf'
+		@echo "const char program_version[] = \"${HASH_VERSION}\";" > src/version.h
 		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
+		@rm src/version.h
 
 .PHONY: test
 test: $(HEADERS) $(TEST_HEADERS)

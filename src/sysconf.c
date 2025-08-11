@@ -50,17 +50,13 @@
 #include "parse-config.h"
 #include "print-config.h"
 #include "abort.h"
+#include "version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
-
-//-------------------------------------------------------------------
-// Constants Declarations
-//-------------------------------------------------------------------
-const char program_version[] = "0.0.1";
 
 //------------------------------------------------------*- C -*------
 // Main
@@ -84,6 +80,7 @@ int main(int argc, char *argv[]) {
   //  if there are not enough arguments, exit.
   if (argc < 3) {
     fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
+    fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
