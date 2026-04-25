@@ -3,20 +3,26 @@
 #: configure
 # This simple script will set options in the makefile.
 
-prefix='$\(HOME\)\/bin'
+prefix='\/usr\/local\/bin'
+manpath='\/usr\/local\/share\/man\/man7'
 for arg in "$@"; do
     case "$arg" in
+    --manpath=*)
+        manpath=`echo $arg | sed 's/--manpath=//'`
+        ;;
     --prefix=*)
         prefix=`echo $arg | sed 's/--prefix=//'`
         ;;
     --help)
         echo 'usage: ./configure [options]'
         echo 'options:'
-        echo '  --prefix=<path>: installation prefix (default $(HOME)/bin)'
+        echo '  --prefix=<path>: installation prefix (default /usr/local/bin)'
+        echo '  --manpath=<path>: installation prefix (default /usr/local/share/man/man1)'
         echo 'all invalid options are silently ignored'
         exit 0
         ;;
     esac
 done
-sed -i '' "s/^prefix.*/prefix	        :=	$prefix/g" makefile
+sed -i '' "s,^PREFIX.*,PREFIX	        :=	$prefix,g" makefile
+sed -i '' "s,^manpath.*,manpath	        :=	$manpath,g" Makefile
 echo 'configuration complete, type `make` to build.'
