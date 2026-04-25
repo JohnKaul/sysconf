@@ -179,8 +179,9 @@ int contains(char **array, int size, const char *value) {
 config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
-    if (!file)
-        return NULL;
+    if (!file) {
+      file = fopen(filename, "w");
+    }
 
     int lines = 0;                                      /* Count the number of lines */
     char buffer[1024];                                  /* buffer stores the line */
