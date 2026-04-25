@@ -3,10 +3,10 @@
 .Dt sysconf.7
 .Os
 .Pp
-.Sh NAME
+.Sh NAME 
 .Nm sysconf
 .Pp
-.Sh SYNOPSIS
+.Sh SYNOPSIS 
 sysconf -f configfile
 .Pp
 sysconf -f configfile -d configfile.defaults
@@ -19,23 +19,46 @@ sysconf -f configfile [key+=value]
 .Pp
 sysconf -f configfile [key-=value]
 .Pp
-.Sh OPTIONS
+.Sh OPTIONS 
 .Bl -tag -width Ds
 .It Fl f
 Configuration file
 .It Fl d
-Check the `configfile`'s key values against `configfile.defaults`'s key
+Check the 
+.Li configfile
+'s key values against 
+.Li configfile.defaults
+'s key
 values for duplicate entries.
 .It Fl n
 Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
-.El
 .Pp
-.Sh DESCRIPTION
-This utility will 'get' (-i.e., print to stdout) and/or 'set' (i.e., change) a key/value value stored in a configuration file formatted in the typical key/value syntax with zero dependencies on external libraries or tools. There are several popular key/value styles different programs and tools can use so this utility was designed to tokenize several.
 .Pp
-By design this utility does not have any flags to specify actions to preform different actions, instead this utility will try to determine what to do, or not to do, based on the arguments given and what is currently in the config file. See the examples below. During a 'set' operation, this utility will also try to determine the syntax of the key/value pair, to be changed, by reading the key/value string (-e.g. based on the key/value being changed, sysconf will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+.Sh DESCRIPTION 
+This utility will 'get' (-i.e., print to stdout) and/or 'set' (i.e.,
+change) a key/value value stored in a configuration file formatted in
+the typical key/value syntax with zero dependencies on external
+libraries or tools. There are several popular key/value styles
+different programs and tools can use so this utility was designed to
+tokenize several.
 .Pp
-This utility can also add and subtract values to a key with '+=' and '-='.
+By design 
+.Nm
+does not have any flags to specify actions to preform
+different actions, instead this utility will try to determine what to
+do, or not to do, based on the arguments given and what is currently
+in the config file. See the examples below. During a 'set' operation,
+.Nm
+will also try to determine the syntax of the key/value
+pair, to be changed, by reading the key/value string (-e.g. based on
+the key/value being changed, sysconf will try to determine if the
+value needs quotes or a termination character and either spaces or an
+equal sign or colon separation character).
+.Pp
+This utility can also add and subtract values to a key with 
+.Cm +=
+and 
+.Cm -=.
 .Pp
 Example configuration file syntaxes this utility can 'get' and 'set'.
 .Bd -literal -offset indent
@@ -51,20 +74,41 @@ Example configuration file syntaxes this utility can 'get' and 'set'.
 .Ed
 .Pp
 .Sy NOTE
-Some keys or values in configuration files can contain special characters like dollar signs ($). To pass these characters to this utility, the dollar sign must be escaped with a slash (\\) or the string can be surrounded with single quotes (').
+:
+Some keys or values in configuration files can contain special
+characters like dollar signs ($). To pass these characters to this
+utility, the dollar sign must be escaped with a slash (\\) or the
+string can be surrounded with single quotes (').
 .Pp
-If the configuration file does not already contain the key/value entry when a call to 'set' is made, this utility will add the new entry, at the bottom of the file, in the following format (which is also the default syntax for rc.conf key/values).
+If the configuration file does not already contain the key/value entry
+when a call to 'set' is made, this utility will add the new entry, at
+the bottom of the file, in the following format (which is also the
+default syntax for rc.conf key/values). If the configuration file does
+not exist, 
+.Nm
+will create the file and add the key/value entry.
 .Pp
 .Bd -literal -offset indent
 key="value"
 .Ed
 .Pp
-This utility does not allow/account for duplicate key/value entries in the 'get' and 'set' stages. The files first key/value entry found durring a 'get' is returned and the files first key/value entry is written to the 'set' stage (the second--duplicate--key/value is not written).
+This utility does not allow/account for duplicate key/value entries in
+the 'get' and 'set' stages. The files first key/value entry found
+durring a 'get' is returned and the files first key/value entry is
+written to the 'set' stage (the second--duplicate--key/value is not
+written).
 .Pp
-It is also possible to check a configuration file's key/values against a default configuration file which will search for duplicate values in keys listed in the configuration file. For example, in FreeBSD the /etc/rc.conf file is included from the file /etc/defaults/rc.conf, which specifies the default settings for all the available options.  Options need only be specified in /etc/rc.conf when the system administrator wishes to override these defaults. See the example section below for 'checking for duplicates'.
+It is also possible to check a configuration file's key/values against
+a default configuration file which will search for duplicate values in
+keys listed in the configuration file. For example, in FreeBSD the
+/etc/rc.conf file is included from the file /etc/defaults/rc.conf,
+which specifies the default settings for all the available options.
+Options need only be specified in /etc/rc.conf when the system
+administrator wishes to override these defaults. See the example
+section below for 'checking for duplicates'.
 .Pp
 .Pp
-.Sh EXAMPLES
+.Sh EXAMPLES 
 .Pp
 .Em LIST ALL VALUE(S)
 .Pp
@@ -81,7 +125,9 @@ To retrieve the value from a key in a file call this program with just the key t
     % value
 .Ed
 .Pp
-If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
+If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the 
+.Li -n
+switch can be used.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file -n key
     % key: value
@@ -123,8 +169,8 @@ To search for duplicate values in a configuration file against a default configu
     % sysconf -f /path/config.file -d /path/config.file.defaults
 .Ed
 .Pp
-.Sh HISTORY
+.Sh HISTORY 
 Created for my personal use.
 .Pp
-.Sh AUTHOR
+.Sh AUTHOR 
 John Kaul
