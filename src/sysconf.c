@@ -184,18 +184,21 @@ int main(int argc, char *argv[]) {
       if(arg_count == 1) {                              /* Seems to be a simple search situation,
                                                            since, we do not have a key in the config
                                                            file, we exit.*/
+        fprintf(stderr, "Error: key not found\n");
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
         free_config(config_array, config_count);
-        return 1;
+        return 2;
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
         printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
-        writevariable(arg_array[0], arg_array, arg_count, file_string);
+        int res = writevariable(arg_array[0], arg_array, arg_count, file_string);
 
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
         free_config(config_array, config_count);
-        return 1;
+        return res;
       }
     }
 
@@ -231,6 +234,9 @@ int main(int argc, char *argv[]) {
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* if the user wants to subtract a value
                                                                            but the value was not found so exit. */
           printf("Value not found in value string. No change made.\n");
+          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+          free(arg_array);
+          free_config(config_array, config_count);
           return 0;
         }
 
@@ -257,7 +263,11 @@ int main(int argc, char *argv[]) {
           printf("%s: %s -> %-5s\n", config_line_array[0], config_line_array[1], arg_array[1]);
         }
 
-        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+        free(arg_array);
+        free_config(config_array, config_count);
+        return res;
 
       } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {/* Check if the user wants a subtraction... */
@@ -280,12 +290,16 @@ int main(int argc, char *argv[]) {
           }
           printf("\n");
 
-          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+          int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+          free(arg_array);
+          free_config(config_array, config_count);
+          return res;
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
         }
 
-        // free stuff here
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);
         free_config(config_array, config_count);
         return 0;
@@ -297,9 +311,8 @@ int main(int argc, char *argv[]) {
   // cleanup
   free_config(config_array, config_count);
 
-  // The following line "free(arg_array)" causes a
-  // malloc error durring a key=value operation.
-//:~    free(arg_array);
+  for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+  free(arg_array);
 
   return 0;
 } ///:~

@@ -131,7 +131,7 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
  * @param count         The value array count.
  * @param filename      The config file to change.
  *
- * @return int          The number of lines in config file.
+ * @return int          0 on success, 1 on error.
  */
 int replacevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
     FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
@@ -139,10 +139,11 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     int found = 0;
     if (!conf_file || !temp_file) {
         fprintf(stderr, "Unable to create temp file or read config file\n");
-        AbortTranslation(abortRuntimeError);
+        if (conf_file) fclose(conf_file);
+        if (temp_file) fclose(temp_file);
+        return 1;
     }
 
-    int lines = 0;                                      /* Count the number of lines; this will be the return value. */
     char buffer[1024];                                  /* buffer stores the line */
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
@@ -281,7 +282,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     fclose(conf_file);
                     fclose(temp_file);
                     fprintf(stderr, "Unable to create final value string for config file writing.\n");
-                    AbortTranslation(abortRuntimeError);
+                    return 1;
                 }
 
                 // Calculate the length of the new line
@@ -292,7 +293,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     fclose(conf_file);
                     fclose(temp_file);
                     fprintf(stderr, "Unable to allocate memory for new replacement string.\n");
-                    AbortTranslation(abortRuntimeError);
+                    return 1;
                 }
 
                 // Construct the new line
@@ -335,13 +336,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
             // Write the original line to the temp file
             fputs(str, temp_file);
         }
-        lines += 1;
     }
     fclose(conf_file);
     fclose(temp_file);
     remove(filename);
     rename(".sys.conf.file.tmp", filename);
-    return lines;
+    return 0;
 }
 /*}}}*/
 
@@ -354,8 +354,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
  * @param count         The value array count.
  * @param filename      The config file to change.
  */
-void writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
+int writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
   FILE* conf_file = fopen(filename, "a");
+  if (!conf_file) {
+    fprintf(stderr, "Unable to open config file for writing.\n");
+    return 1;
+  }
   int spaces_before = 0;
   int spaces_after = 0;
   char separator = '=';
@@ -365,10 +369,16 @@ void writevariable(const char *key, char **value, int count, const char *filenam
   quote_char[0] = '"';
 
   char *value_assembled = assemble_strings(value, count);
+  if (!value_assembled) {
+    fclose(conf_file);
+    return 1;
+  }
 
   // Construct the new line
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
 
+  free(value_assembled);
   fclose(conf_file);
+  return 0;
 }
 /*}}}*/

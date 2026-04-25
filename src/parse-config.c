@@ -139,7 +139,7 @@ config_t* find_config_item(config_t* config, const char* name, int count) {     
   for (int i = 0; i < count; i++) {
     if (config[i].values != NULL && \
         config[i].values[0] != NULL) {
-      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+      if (strcmp(config[i].values[0], name) == 0) {
         return &config[i];
       }
     }
@@ -160,7 +160,7 @@ config_t* find_config_item(config_t* config, const char* name, int count) {     
  */
 int contains(char **array, int size, const char *value) {       /*{{{*/
     for (int i = 0; i < size; i++) {
-        if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
+        if (array[i] != NULL && strcmp(array[i], value) == 0) {
             return 1; // Found
         }
     }
@@ -261,7 +261,7 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
  */
 char **get_value(config_t* config, int count, const char* name) {        /*{{{*/
     for (int i = 0; i < count; i++) {
-      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+      if (strcmp(config[i].values[0], name) == 0) {
         return config[i].values;
       }
   }
@@ -301,12 +301,16 @@ void print_config_item(config_t* config, int count, const char* name) {     /*{{
  * @param config        A pointer to the configuration data.
  * @param count         The number of configuration entries.
  */
-void free_config(config_t *config, int count) {/*{{{*/
+void free_config(config_t *config, int count) {
+    if (config == NULL) return;
     for (int i = 0; i < count; i++) {
-      free(config[i].values);
+        if (config[i].values != NULL) {
+            for (int j = 0; j < config[i].value_count; j++) {
+                free(config[i].values[j]);
+            }
+            free(config[i].values);
+        }
     }
-//:~      while(count > 0) {
-//:~        free(config[count--].values);
-//:~      }
+    free(config);
 }/*}}}*/
 
