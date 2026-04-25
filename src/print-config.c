@@ -15,7 +15,7 @@
  * @param config_array  The array to pull data from.
  * @param array_count   The number of items in `config_array`.
  */
-void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
+void printconfigfile(config_t* config_array, int array_count ){
 
   // No argument (key = value or key) given so just print the config values.
   for (int i = 0; i < array_count; i++) {
@@ -38,7 +38,6 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
     printf("\n");
   }
 }
-/*}}}*/
 
 /**
  *: add_to_array
@@ -51,7 +50,7 @@ void printconfigfile(config_t* config_array, int array_count ){     /*{{{*/
  *
  * @return int          New size of array.
  */
-int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
+int add_to_array(char ***argvp, int size, const char *string) {
     // Reallocate memory for the new size of the array
     char **new_array = realloc(*argvp, (size + 1) * sizeof(char *));
     if (new_array == NULL) {
@@ -68,7 +67,6 @@ int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
 
     return size + 1;                                    /* Return the new size of the array */
 }
-/*}}}*/
 
 /**
  *: assemble_strings
@@ -83,7 +81,7 @@ int add_to_array(char ***argvp, int size, const char *string) {     /*{{{*/
  *
  * @return char*        Assembled char array.
  */
-char* assemble_strings(char **value, int count) {       /*{{{*/
+char* assemble_strings(char **value, int count) {
     // Calculate the total length needed
     int total_length = 0;
     for (int i = 1; i < count; i++) {
@@ -120,7 +118,6 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
 
     return result;
 }
-/*}}}*/
 
 /**
  *: replacevariable
@@ -133,7 +130,7 @@ char* assemble_strings(char **value, int count) {       /*{{{*/
  *
  * @return int          The number of lines in config file.
  */
-int replacevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
+int replacevariable(const char *key, char **value, int count, const char *filename) {
     FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
     FILE* temp_file = fopen(".sys.conf.file.tmp", "w"); /* Open a temp file READ/WRITE */
     int found = 0;
@@ -147,7 +144,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
-        if (memcmp(key, str, strlen(key)) == 0) {
+//:~              && \ strncmp(key, str, strlen(str)) == 0) {
+        if (strncmp(key, str, strlen(key)) == 0 ) {
             // If we've found this key before, skip it and move on.
             if (found == 1)
                 continue;
@@ -343,7 +341,6 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     rename(".sys.conf.file.tmp", filename);
     return lines;
 }
-/*}}}*/
 
 /**
  *: writevariable
@@ -354,7 +351,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
  * @param count         The value array count.
  * @param filename      The config file to change.
  */
-void writevariable(const char *key, char **value, int count, const char *filename) {       /*{{{*/
+void writevariable(const char *key, char **value, int count, const char *filename) {
   FILE* conf_file = fopen(filename, "a");
   int spaces_before = 0;
   int spaces_after = 0;
@@ -371,4 +368,3 @@ void writevariable(const char *key, char **value, int count, const char *filenam
 
   fclose(conf_file);
 }
-/*}}}*/

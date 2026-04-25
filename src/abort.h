@@ -8,23 +8,22 @@
  *: TabAbortCode --
  *      Enums for standard errors.
  */
-enum TAbortCode {     /*{{{*/
+enum TAbortCode {
   abortInvalidCommandLineArgs   = -1,
   abortRuntimeError             = -2,
   abortUnimplementedFeature     = -3
-};/*}}}*/
+};
 
 /**
  *: Abort Messages --
  *      Keyed to ennumeration type TAbortCode
  */
-const static char *abortMsg[] = {     /*{{{*/
+const static char *abortMsg[] = {
     NULL,
     "Invalid command line arguments",
     "Runtime error",
     "Unimplemented feature",
 };
-/*}}}*/
 
 /**
  *: AbortTranslation --

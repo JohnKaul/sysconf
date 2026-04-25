@@ -15,7 +15,7 @@
  *
  * @return The number of tokens found, or -1 on error.
  */
-int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
+int count_tokens(const char *input_string, const char *delimiters) {
     if (input_string == NULL || delimiters == NULL) {
         return -1;
     }
@@ -48,7 +48,6 @@ int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
     free(tokenized_string);
     return tokens;
 }
-/* }}} */
 
 /**
  *: populate_array
@@ -61,7 +60,7 @@ int count_tokens(const char *input_string, const char *delimiters) {/* {{{ */
  *
  * @return 0 on success, -1 on error.
  */
-int populate_array(const char *input_string, const char *delimiters, char ***argvp, int tokens) {/* {{{ */
+int populate_array(const char *input_string, const char *delimiters, char ***argvp, int tokens) {
     const char *stash = input_string + strspn(input_string, delimiters);
     char *tokenized_string = strndup(stash, strlen(stash));
     if (tokenized_string == NULL) {
@@ -91,7 +90,6 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
     free(tokenized_string);
     return 0;
 }
-/* }}} */
 
 /**
  *: make_argv
@@ -103,7 +101,7 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
  *
  * @return The number of elements in the array, or -1 on error.
  */
-int make_argv(const char *input_string, const char *delimiters, char ***argvp) {        /* {{{ */
+int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
     int tokens = count_tokens(input_string, delimiters);
     if (tokens < 0) {
         *argvp = NULL;
@@ -124,7 +122,6 @@ int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
 
     return tokens;
 }
-/* }}} */
 
 /**
  *: find_config_item
@@ -135,7 +132,7 @@ int make_argv(const char *input_string, const char *delimiters, char ***argvp) {
  *
  * @returns 0 = Not found. 1 = Item found.
  */
-config_t* find_config_item(config_t* config, const char* name, int count) {       /*{{{*/
+config_t* find_config_item(config_t* config, const char* name, int count) {
   for (int i = 0; i < count; i++) {
     if (config[i].values != NULL && \
         config[i].values[0] != NULL) {
@@ -146,7 +143,6 @@ config_t* find_config_item(config_t* config, const char* name, int count) {     
   }
   return NULL;
 }
-/*}}}*/
 
 /**
  *: contains
@@ -158,7 +154,7 @@ config_t* find_config_item(config_t* config, const char* name, int count) {     
  *
  * @returns 0 = Not found. 1 = Item found.
  */
-int contains(char **array, int size, const char *value) {       /*{{{*/
+int contains(char **array, int size, const char *value) {
     for (int i = 0; i < size; i++) {
         if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
             return 1; // Found
@@ -166,7 +162,6 @@ int contains(char **array, int size, const char *value) {       /*{{{*/
     }
     return 0; // Not found
 }
-/*}}}*/
 
 /**
  *: parse_config
@@ -181,7 +176,7 @@ int contains(char **array, int size, const char *value) {       /*{{{*/
  * @return config_t*    A pointer to the parsed configuration data, or
  *                      NULL on error.
  */
-config_t* parse_config(const char* filename, int* count, char *delimiters) {      /*{{{*/
+config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
     if (!file)
@@ -247,7 +242,6 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
     fclose(file);
     return config;
 }
-/*}}}*/
 
 /**
  *: get_value
@@ -259,7 +253,7 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {    
  *
  * @return char**       An array of char arrays.
  */
-char **get_value(config_t* config, int count, const char* name) {        /*{{{*/
+char **get_value(config_t* config, int count, const char* name) {
     for (int i = 0; i < count; i++) {
       if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
         return config[i].values;
@@ -267,7 +261,6 @@ char **get_value(config_t* config, int count, const char* name) {        /*{{{*/
   }
     return NULL;
 }
-/*}}}*/
 
 /**
  *: print_config_item
@@ -284,7 +277,7 @@ char **get_value(config_t* config, int count, const char* name) {        /*{{{*/
  * @param count         The number of configuration entries.
  * @param name          The name of the value to retrieve.
  */
-void print_config_item(config_t* config, int count, const char* name) {     /*{{{*/
+void print_config_item(config_t* config, int count, const char* name) {
   for (int i = 0; i < count; i++) {
     if (strcmp(config[i].values[0], name) == 0) {
 //:~        printf("%s =\t %s\n", name, config[i].values[1]);
@@ -292,7 +285,6 @@ void print_config_item(config_t* config, int count, const char* name) {     /*{{
     }
   }
 }
-/*}}}*/
 
 /**
  *: free_config
@@ -301,12 +293,11 @@ void print_config_item(config_t* config, int count, const char* name) {     /*{{
  * @param config        A pointer to the configuration data.
  * @param count         The number of configuration entries.
  */
-void free_config(config_t *config, int count) {/*{{{*/
+void free_config(config_t *config, int count) {
     for (int i = 0; i < count; i++) {
       free(config[i].values);
     }
 //:~      while(count > 0) {
 //:~        free(config[count--].values);
 //:~      }
-}/*}}}*/
-
+}

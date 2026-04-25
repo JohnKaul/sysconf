@@ -17,7 +17,7 @@
  *      AbortTranslation(abortInvalidCommandLineArgs);
  *  }
  */
-void AbortTranslation ( enum TAbortCode ac ) {     /*{{{*/
+void AbortTranslation ( enum TAbortCode ac ) {
     fprintf(stderr, "**** Fatal translation error: %s\n", abortMsg[-ac]);
     exit ( ac );
-} /*}}}*/
+}
