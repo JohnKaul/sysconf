@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>  /* for isstring() */
+#include <errno.h>
 
 /**
  *: count_tokes
@@ -179,8 +180,16 @@ int contains(char **array, int size, const char *value) {
 config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
+    // If we cannot open the file for 'read', assume it doesn't exist
+    // and open for 'write' (to create it).
     if (!file) {
       file = fopen(filename, "w");
+    }
+    // If we still don't have a file, we must have a situation
+    // where we cannot create one. Report why and exit.
+    if (!file) {
+        fprintf(stderr, "%s\n", strerror(errno));
+        return NULL;
     }
 
     int lines = 0;                                      /* Count the number of lines */
