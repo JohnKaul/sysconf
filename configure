@@ -24,5 +24,5 @@ for arg in "$@"; do
     esac
 done
 sed -i '' "s,^PREFIX.*,PREFIX	        :=	$prefix,g" makefile
-sed -i '' "s,^manpath.*,manpath	        :=	$manpath,g" Makefile
+sed -i '' "s,^manpath.*,manpath	        :=	$manpath,g" makefile
 echo 'configuration complete, type `make` to build.'
