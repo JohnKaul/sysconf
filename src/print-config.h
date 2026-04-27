@@ -12,7 +12,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
 //: writevariable
 //      Write items in value in the config file.
-int writevariable(const char *key, char **value, int count, const char *filename);
+void writevariable(const char *key, char **value, int count, const char *filename);
 
 //: Printconfifile
 //      Iterates the `config_array` and prints the items.

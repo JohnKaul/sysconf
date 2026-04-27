@@ -117,6 +117,8 @@ char* assemble_strings(char **value, int count) {
     *ptr = '\0';                                        /* Null-terminate the final string */
 
     return result;
+//:~      free(result);
+//:~      return ptr;
 }
 
 /**
@@ -128,7 +130,7 @@ char* assemble_strings(char **value, int count) {
  * @param count         The value array count.
  * @param filename      The config file to change.
  *
- * @return int          0 on success, 1 on error.
+ * @return int          The number of lines in config file.
  */
 int replacevariable(const char *key, char **value, int count, const char *filename) {
     FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
@@ -234,6 +236,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                     count = add_to_array(&value, count, current_config_array[i]);
                   }
+//:~                    free(str);
+//:~                    free(value);
                 }
 
                 if (strstr(value[0], "-") != NULL) {
@@ -272,6 +276,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   }
                   value = new_config_array;
                   count = new_count;
+//:~                    free(str);
                 }
 
                 // Assemble the new value string
@@ -307,6 +312,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     terminator);
                 // Write the new line to the temp file
                 fputs(new_line, temp_file);
+                free(new_line);
 
                 // Add any inline comments back into the string.
                 if (comment != 0) {
@@ -318,21 +324,25 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 fputs("\n", temp_file);
-                free(new_line);
                 free(value_assembled);
-                if (current_config_array) {
+//:~                  if (current_config_array) {
                     for (int j = 0; current_config_array[j] != NULL; j++) {
                         free(current_config_array[j]);  /* Free each string */
                     }
                     free(current_config_array);         /* Free the array itself */
                     current_config_array = NULL;        /* avoid dangling pointer */
-                }
-                free(value);
+//:~                  }
+//:~                  free(value);
                 found = 1;
+//:~                  for (int j = 0; current_config_array[j] != NULL; j++) {
+//:~                    free(current_config_array[j]);  /* Free each string */
+//:~                  }
+//:~                  free(current_config_array);         /* Free the array itself */
             }
         } else {
             // Write the original line to the temp file
             fputs(str, temp_file);
+//:~              free(str);
         }
     }
     fclose(conf_file);
@@ -351,12 +361,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
  * @param count         The value array count.
  * @param filename      The config file to change.
  */
-int writevariable(const char *key, char **value, int count, const char *filename) {
+void writevariable(const char *key, char **value, int count, const char *filename) {
   FILE* conf_file = fopen(filename, "a");
-  if (!conf_file) {
-    fprintf(stderr, "Unable to open config file for writing.\n");
-    return 1;
-  }
   int spaces_before = 0;
   int spaces_after = 0;
   char separator = '=';
@@ -366,15 +372,10 @@ int writevariable(const char *key, char **value, int count, const char *filename
   quote_char[0] = '"';
 
   char *value_assembled = assemble_strings(value, count);
-  if (!value_assembled) {
-    fclose(conf_file);
-    return 1;
-  }
 
   // Construct the new line
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
 
-  free(value_assembled);
+//:~    free(value_assembled);
   fclose(conf_file);
-  return 0;
 }

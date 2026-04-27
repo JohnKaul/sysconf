@@ -190,12 +190,14 @@ int main(int argc, char *argv[]) {
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
         printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
-        int res = writevariable(arg_array[0], arg_array, arg_count, file_string);
+//:~          int res = writevariable(arg_array[0], arg_array, arg_count, file_string);
+        writevariable(arg_array[0], arg_array, arg_count, file_string);
 
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
         free_config(config_array, config_count);
-        return res;
+//:~          return res;
+        return 0;
       }
     }
 
@@ -261,8 +263,8 @@ int main(int argc, char *argv[]) {
         }
 
         int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);
+//:~          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+//:~          free(arg_array);
         free_config(config_array, config_count);
         return res;
 
@@ -287,11 +289,13 @@ int main(int argc, char *argv[]) {
           }
           printf("\n");
 
-          int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+//:~            int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
           free(arg_array);
           free_config(config_array, config_count);
-          return res;
+//:~            return res;
+          return 0;
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
         }

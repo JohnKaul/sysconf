@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>  /* for isstring() */
-#include <errno.h>
 
 /**
  *: count_tokes
@@ -137,7 +136,7 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
   for (int i = 0; i < count; i++) {
     if (config[i].values != NULL && \
         config[i].values[0] != NULL) {
-      if (strcmp(config[i].values[0], name) == 0) {
+      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
         return &config[i];
       }
     }
@@ -157,7 +156,7 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
  */
 int contains(char **array, int size, const char *value) {
     for (int i = 0; i < size; i++) {
-        if (array[i] != NULL && strcmp(array[i], value) == 0) {
+        if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
             return 1; // Found
         }
     }
@@ -180,17 +179,8 @@ int contains(char **array, int size, const char *value) {
 config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
-    // If we cannot open the file for 'read', assume it doesn't exist
-    // and open for 'write' (to create it).
-    if (!file) {
-      file = fopen(filename, "w");
-    }
-    // If we still don't have a file, we must have a situation
-    // where we cannot create one. Report why and exit.
-    if (!file) {
-        fprintf(stderr, "%s\n", strerror(errno));
+    if (!file)
         return NULL;
-    }
 
     int lines = 0;                                      /* Count the number of lines */
     char buffer[1024];                                  /* buffer stores the line */
@@ -265,7 +255,7 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
  */
 char **get_value(config_t* config, int count, const char* name) {
     for (int i = 0; i < count; i++) {
-      if (strcmp(config[i].values[0], name) == 0) {
+      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
         return config[i].values;
       }
   }
@@ -304,7 +294,6 @@ void print_config_item(config_t* config, int count, const char* name) {
  * @param count         The number of configuration entries.
  */
 void free_config(config_t *config, int count) {
-    if (config == NULL) return;
     for (int i = 0; i < count; i++) {
         if (config[i].values != NULL) {
             for (int j = 0; j < config[i].value_count; j++) {
@@ -313,5 +302,8 @@ void free_config(config_t *config, int count) {
             free(config[i].values);
         }
     }
-    free(config);
+//:~      free(config);
+//:~      while(count > 0) {
+//:~        free(config[count--].values);
+//:~      }
 }
