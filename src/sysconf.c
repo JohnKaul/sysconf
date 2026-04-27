@@ -151,6 +151,7 @@ int main(int argc, char *argv[]) {
   if( argc == 3) {
     printconfigfile(config_array, config_count);
     free_config(config_array, config_count);
+    free(config_array);
     return 0;
   }
 
@@ -215,6 +216,11 @@ int main(int argc, char *argv[]) {
         printf("%s ", *config_line_array++);
       }
       printf("\n");
+      for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+      free(arg_array);                                /* cleanup */
+      free_config(config_array, config_count);
+      free(config_array);
+      return 0;
     }
 
     // -If the argument is equal to 'key=value' make a replacement.
@@ -236,6 +242,7 @@ int main(int argc, char *argv[]) {
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
           free(arg_array);
           free_config(config_array, config_count);
+          free(config_array);
           return 0;
         }
 
@@ -263,9 +270,8 @@ int main(int argc, char *argv[]) {
         }
 
         int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
-//:~          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-//:~          free(arg_array);
         free_config(config_array, config_count);
+        free(config_array);
         return res;
 
       } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
@@ -289,12 +295,9 @@ int main(int argc, char *argv[]) {
           }
           printf("\n");
 
-//:~            int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
-          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-          free(arg_array);
           free_config(config_array, config_count);
-//:~            return res;
+          free(config_array);
           return 0;
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
@@ -303,6 +306,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);
         free_config(config_array, config_count);
+        free(config_array);
         return 0;
       }
 
@@ -311,6 +315,7 @@ int main(int argc, char *argv[]) {
 
   // cleanup
   free_config(config_array, config_count);
+  free(config_array);
 
   for (int i = 0; i < arg_count; i++) free(arg_array[i]);
   free(arg_array);
