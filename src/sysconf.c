@@ -186,6 +186,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
         free_config(config_array, config_count);
+        free(config_array);
         return 2;
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
@@ -197,6 +198,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
         free_config(config_array, config_count);
+        free(config_array);
 //:~          return res;
         return 0;
       }
