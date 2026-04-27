@@ -376,6 +376,6 @@ void writevariable(const char *key, char **value, int count, const char *filenam
   // Construct the new line
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
 
-//:~    free(value_assembled);
+  free(value_assembled);
   fclose(conf_file);
 }
