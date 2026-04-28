@@ -194,7 +194,6 @@ int main(int argc, char *argv[]) {
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
         printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
-//:~          int res = writevariable(arg_array[0], arg_array, arg_count, file_string);
         writevariable(arg_array[0], arg_array, arg_count, file_string);
 
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
@@ -205,7 +204,6 @@ int main(int argc, char *argv[]) {
         free(config_array);
         config_array = NULL;
 
-//:~          return res;
         return 0;
       }
     }
@@ -253,6 +251,7 @@ int main(int argc, char *argv[]) {
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
           free(arg_array);
           arg_array = NULL;
+
           free_config(config_array, config_count);
           free(config_array);
           config_array = NULL;
@@ -285,6 +284,10 @@ int main(int argc, char *argv[]) {
 
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
+        /* LOGIC:
+         * - The concept is to free `arg_array` up to the `arg_count`, and allow the
+         *   `print-config.c` to free the additional value(s) added to the `arg_array`.
+         */
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);
         arg_array = NULL;
@@ -318,6 +321,12 @@ int main(int argc, char *argv[]) {
 
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
+        /* LOGIC:
+         * - The concept is to free `arg_array` up to the `arg_count`,
+         *   and allow the `print-config.c` to subtract from it's
+         *   counter to free any remaining value(s) from the
+         *   `arg_array`.
+         */
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
           free(arg_array);
           arg_array = NULL;

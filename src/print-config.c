@@ -255,7 +255,6 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                       strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
                     printf("Last value for key removed. Key removed from file.\n");
                     for (int j = 0; current_config_array[j] != NULL; j++) {
-//:~                      for (int j = 0; j < count; j++) {
                         free(current_config_array[j]);  /* Free each string */
                     }
                     free(current_config_array);         /* Free the array itself */
