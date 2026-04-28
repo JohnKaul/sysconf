@@ -184,6 +184,8 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // and open for 'write' (to create it).
     if (!file) {
       file = fopen(filename, "w");
+      fclose(file);
+      return NULL;
     }
     // If we still don't have a file, we must have some situation
     // where we cannot create one. Report why and exit.
@@ -312,8 +314,4 @@ void free_config(config_t *config, int count) {
             free(config[i].values);
         }
     }
-//:~      free(config);
-//:~      while(count > 0) {
-//:~        free(config[count--].values);
-//:~      }
 }
