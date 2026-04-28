@@ -117,8 +117,6 @@ char* assemble_strings(char **value, int count) {
     *ptr = '\0';                                        /* Null-terminate the final string */
 
     return result;
-//:~      free(result);
-//:~      return ptr;
 }
 
 /**
@@ -144,6 +142,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     }
 
     char buffer[1024];                                  /* buffer stores the line */
+    int start = count;
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
@@ -168,6 +167,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 int comment = 0;                        /* used a a flag when an inline comment is found. */
                 int comment_pos = 0;                    /* used as a starting point in a loop counter to
                                                            add any inline comments back to string. */
+
+                int new_count = 1;
 
                 if (strnstr(str, "=", strlen(str))) separator = '=';
                 if (strnstr(str, ":", strlen(str))) separator = ':';
@@ -216,6 +217,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 //      the config file value array.
                 //   2. Assemble the arrays.
                 char **current_config_array = NULL;
+                char **new_config_array = NULL;         /* Array used to add only items in current config_array
+                                                         * that are not called out to be removed.
+                                                         */
                 int argc;
                 int i = 1;
                 if (strstr(value[0], "+") != NULL) {
@@ -233,19 +237,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                       comment_pos = i;
                       break;
                     }
-
                     count = add_to_array(&value, count, current_config_array[i]);
                   }
-//:~                    free(str);
-//:~                    free(value);
                 }
 
                 if (strstr(value[0], "-") != NULL) {
-                char **new_config_array = NULL;         /* Array used to add only items in current config_array
-                                                         * that are not called out to be removed.
-                                                         */
 
-                int new_count = 1;
                   // XXX: make delimiters a global variable which can be referenced here.
                   char delimiters[] = " \t\n\"\':=;";
                   argc = make_argv(str, delimiters, &current_config_array);
@@ -257,6 +254,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   if (argc == 2 && \
                       strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
                     printf("Last value for key removed. Key removed from file.\n");
+                    for (int j = 0; current_config_array[j] != NULL; j++) {
+//:~                      for (int j = 0; j < count; j++) {
+                        free(current_config_array[j]);  /* Free each string */
+                    }
+                    free(current_config_array);         /* Free the array itself */
+                    current_config_array = NULL;        /* avoid dangling pointer */
                     continue;
                   }
 
@@ -276,7 +279,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   }
                   value = new_config_array;
                   count = new_count;
-//:~                    free(str);
+                  start -= 1;
                 }
 
                 // Assemble the new value string
@@ -310,9 +313,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                     value_assembled,
                     quote_char,
                     terminator);
+
                 // Write the new line to the temp file
                 fputs(new_line, temp_file);
-                free(new_line);
 
                 // Add any inline comments back into the string.
                 if (comment != 0) {
@@ -324,25 +327,26 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 fputs("\n", temp_file);
+
+                for (int j = 0; current_config_array[j] != NULL; j++) {
+                  free(current_config_array[j]);        /* Free each string */
+                }
+                free(current_config_array);             /* Free the array itself */
+                current_config_array = NULL;            /* avoid dangling pointer */
+
+                free(new_line);
+                new_line = NULL;
+
                 free(value_assembled);
-//:~                  if (current_config_array) {
-                    for (int j = 0; current_config_array[j] != NULL; j++) {
-                        free(current_config_array[j]);  /* Free each string */
-                    }
-                    free(current_config_array);         /* Free the array itself */
-                    current_config_array = NULL;        /* avoid dangling pointer */
-//:~                  }
-//:~                  free(value);
+
+                for(int i = start; i < count; i++) free(value[i]);
+                free(new_config_array);
+
                 found = 1;
-//:~                  for (int j = 0; current_config_array[j] != NULL; j++) {
-//:~                    free(current_config_array[j]);  /* Free each string */
-//:~                  }
-//:~                  free(current_config_array);         /* Free the array itself */
             }
         } else {
-            // Write the original line to the temp file
-            fputs(str, temp_file);
-//:~              free(str);
+          // Write the original line to the temp file
+          fputs(str, temp_file);
         }
     }
     fclose(conf_file);

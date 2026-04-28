@@ -185,8 +185,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: key not found\n");
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);                                /* cleanup */
+        arg_array = NULL;
         free_config(config_array, config_count);
         free(config_array);
+        config_array = NULL;
         return 2;
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
@@ -196,9 +198,13 @@ int main(int argc, char *argv[]) {
         writevariable(arg_array[0], arg_array, arg_count, file_string);
 
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);                                /* cleanup */
+        free(arg_array);
+        arg_array = NULL;
+
         free_config(config_array, config_count);
         free(config_array);
+        config_array = NULL;
+
 //:~          return res;
         return 0;
       }
@@ -220,8 +226,10 @@ int main(int argc, char *argv[]) {
       printf("\n");
       for (int i = 0; i < arg_count; i++) free(arg_array[i]);
       free(arg_array);                                /* cleanup */
+      arg_array = NULL;
       free_config(config_array, config_count);
       free(config_array);
+      config_array = NULL;
       return 0;
     }
 
@@ -241,40 +249,51 @@ int main(int argc, char *argv[]) {
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* if the user wants to subtract a value
                                                                            but the value was not found so exit. */
           printf("Value not found in value string. No change made.\n");
+
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
           free(arg_array);
+          arg_array = NULL;
           free_config(config_array, config_count);
           free(config_array);
+          config_array = NULL;
+
           return 0;
         }
 
         if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
           printf("%s: ", config_line_array[0]);
 
-          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-            if (memcmp(config_line_array[i], "#", 1) == 0)
-                break;
-            printf("%s ", config_line_array[i]);
-          }
+         for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
+           if (memcmp(config_line_array[i], "#", 1) == 0)
+               break;
+           printf("%s ", config_line_array[i]);
+         }
 
-          printf("-> %s ", arg_array[1]);
+         printf("-> %s ", arg_array[1]);
 
-          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-            if (memcmp(config_line_array[i], "#", 1) == 0)
-                break;
-            printf("%s ", config_line_array[i]);
-          }
-          printf("\n");
+         for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
+           if (memcmp(config_line_array[i], "#", 1) == 0)
+               break;
+           printf("%s ", config_line_array[i]);
+         }
+         printf("\n");
 
         } else {                                                        /* just a simple = statement */
           // replacing a variable...
           printf("%s: %s -> %-5s\n", config_line_array[0], config_line_array[1], arg_array[1]);
         }
 
-        int res = replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+        free(arg_array);
+        arg_array = NULL;
+
         free_config(config_array, config_count);
         free(config_array);
-        return res;
+        config_array = NULL;
+
+        return 0;
 
       } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
         if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {/* Check if the user wants a subtraction... */
@@ -282,7 +301,7 @@ int main(int argc, char *argv[]) {
 
           for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
             if (memcmp(config_line_array[i], "#", 1) == 0)
-                break;
+              break;
             printf("%s ", config_line_array[i]);
           }
 
@@ -291,15 +310,22 @@ int main(int argc, char *argv[]) {
           for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
             if(strncmp(config_line_array[i], arg_array[1], strlen(config_line_array[i])) != 0) {
               if (memcmp(config_line_array[i], "#", 1) == 0)
-                  break;
+                break;
               printf("%s ", config_line_array[i]);
             }
           }
           printf("\n");
 
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+
+          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+          free(arg_array);
+          arg_array = NULL;
+
           free_config(config_array, config_count);
           free(config_array);
+          config_array = NULL;
+
           return 0;
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
@@ -307,8 +333,12 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
         free(arg_array);
+        arg_array = NULL;
+
         free_config(config_array, config_count);
         free(config_array);
+        config_array = NULL;
+
         return 0;
       }
 
@@ -316,11 +346,13 @@ int main(int argc, char *argv[]) {
   }     /* end_ if(arg_count >= 1) */
 
   // cleanup
-  free_config(config_array, config_count);
-  free(config_array);
-
   for (int i = 0; i < arg_count; i++) free(arg_array[i]);
   free(arg_array);
+  arg_array = NULL;
+  free_config(config_array, config_count);
+  free(config_array);
+  config_array = NULL;
+
 
   return 0;
 } ///:~
