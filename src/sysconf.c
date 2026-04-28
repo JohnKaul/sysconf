@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
         free_config(config_array, config_count);
         free(config_array);
         config_array = NULL;
-        return 2;
+        return 1;
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
@@ -339,18 +339,7 @@ int main(int argc, char *argv[]) {
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
         }
-
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);
-        arg_array = NULL;
-
-        free_config(config_array, config_count);
-        free(config_array);
-        config_array = NULL;
-
-        return 0;
       }
-
     }   /* end_ if(arg_count > 1)  */
   }     /* end_ if(arg_count >= 1) */
 
@@ -358,6 +347,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < arg_count; i++) free(arg_array[i]);
   free(arg_array);
   arg_array = NULL;
+
   free_config(config_array, config_count);
   free(config_array);
   config_array = NULL;
