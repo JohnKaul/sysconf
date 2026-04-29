@@ -162,7 +162,7 @@ This will compile a file called `test_sysconf`.
 This project also has a shell script to preform some syntax type
 tests.
 
-``sh
+```sh
     $ chmod u+x ./test_syntax.sh
     $ ./test_syntax.sh
 ```
