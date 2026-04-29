@@ -2,6 +2,9 @@
 
 This project adheres to Semantic Versioning (https://semver.org/).
 
+v1.1.1 - 2026-04-29
+- Corrected read-after-free bug.
+
 v1.1.0 - 2026-04-28
 - Updated documentation.
 

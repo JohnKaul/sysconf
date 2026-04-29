@@ -288,13 +288,17 @@ int main(int argc, char *argv[]) {
          * - The concept is to free `arg_array` up to the `arg_count`, and allow the
          *   `print-config.c` to free the additional value(s) added to the `arg_array`.
          */
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);
+//:~          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+//:~          free(arg_array);
         arg_array = NULL;
 
         free_config(config_array, config_count);
         free(config_array);
         config_array = NULL;
+
+//:~          for (int i = 0; config_line_array[i] != NULL; i++) free(config_line_array[i]);
+//:~          free(config_line_array);
+//:~          config_line_array = NULL;
 
         return 0;
 

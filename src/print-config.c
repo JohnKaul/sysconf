@@ -65,6 +65,8 @@ int add_to_array(char ***argvp, int size, const char *string) {
         return -1;                                      /* Memory allocation for the string failed */
     }
 
+#if __FreeBSD__
+#endif
     return size + 1;                                    /* Return the new size of the array */
 }
 
@@ -278,7 +280,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                   }
                   value = new_config_array;
                   count = new_count;
-                  start -= 1;
+                  start += 1;
                 }
 
                 // Assemble the new value string
@@ -339,7 +341,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 free(value_assembled);
 
                 for(int i = start; i < count; i++) free(value[i]);
+
                 free(new_config_array);
+                new_config_array = NULL;
 
                 found = 1;
             }
