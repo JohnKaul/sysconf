@@ -159,22 +159,44 @@ This project also has some unit testing which can be compiled and run.
 ```
 This will compile a file called `test_sysconf`.
 
+This project also has a shell script to preform some syntax type
+tests.
+
+``sh
+    $ chmod u+x ./test_syntax.sh
+    $ ./test_syntax.sh
+```
+
 ## CONTRIBUTION GUIDELINES
 
-### Git Standards
+### Version numbering
+Version number MAJOR.MINOR.PATCH:
+- **MAJOR** version when you make incompatible API changes
+- **MINOR** version when you add functionality in a backward compatible manner
+- **PATCH** version when you make backward compatible bug fixes
+
+_NOTE_: loosely based on Semantic Versioning 2.0.0.
 
 #### Commiting
 
-1.  Commit each file as changes are made.
-2.  Do not commit files in batch.
-3.  Please prefix all commits with the file you are commiting.
-4.  Separate subject from body with a blank line
-5.  Limit the subject line to 50 characters
-6.  Capitalize the subject line
-7.  Do not end the subject line with a period
-8.  Use the imperative mood in the subject line
-9.  Wrap the body at 72 characters
-10. Use the body to explain what and why vs. how
+1.  List file(s) on the subject line. If commiting several files
+    prefix the subject line with "(MF)"--which stands for "multiple
+    files" and separate each file with a comma.
+2.  Separate subject from body with a blank line.
+3.  Limit the subject line to 50 characters.
+4.  Do not end the subject line with a period.
+5.  Use the imperative mood in the subject line.
+6.  Wrap the body at 72 characters.
+7.  Use the body to explain what and why vs. how.
+8.  Update the `changelog` and `src/version.h` file for each
+    contribution.
+
+Example commit:
+```
+        (MF) changelog, version.h, sysconf.7:
+
+        1. Updated documentation.
+```
 
 ## HISTORY
 * Created for my personal use.
