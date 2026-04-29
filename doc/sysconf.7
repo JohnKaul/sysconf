@@ -1,38 +1,57 @@
 .Au John Kaul
-.Dd Feb 07 2025
+.Dd April 28 2026
 .Dt sysconf.7
 .Os
 .Pp
 .Sh NAME 
-.Nm sysconf
+.Nm sysconf 
+.Nd A dependency free key/value configuration file editing tool.
 .Pp
 .Sh SYNOPSIS 
-sysconf -f configfile
-.Pp
-sysconf -f configfile -d configfile.defaults
-.Pp
-sysconf -f configfile [-n] [key]
-.Pp
-sysconf -f configfile [key=value]
-.Pp
-sysconf -f configfile [key+=value]
-.Pp
-sysconf -f configfile [key-=value]
+.Nm
+-f configfile
+.Nm
+-f configfile [-d configfile.defaults]
+.Nm
+-f configfile [-n] [key]
+.Nm
+-f configfile [key=value]
+.Nm
+-f configfile [key+=value]
+.Nm
+-f configfile [key-=value]
 .Pp
 .Sh OPTIONS 
 .Bl -tag -width Ds
-.It Fl f
+.It Fl f Ar configfile
 Configuration file
-.It Fl d
+.Pp
+.It Fl d Ar configfile.defaults
 Check the 
 .Li configfile
 's key values against 
 .Li configfile.defaults
 's key
 values for duplicate entries.
-.It Fl n
-Display "key" as well when retrieving a variable. The default method is to only display a key's value but this option makes the return show both the key and the value.
 .Pp
+.It Fl n
+Display "key" as well when retrieving a variable. The default method
+is to only display a key's value but this option makes the return show
+both the key and the value.
+.Pp
+.It key
+Displays the values associated with given key.
+.Pp
+.It key=value
+This option adds a new or overwrites an existing key/value entry.
+.Pp
+.It key+=value
+This option add to an existing key/value entry.
+.Pp
+.It key-=value
+This option deletes an existing key's value entry. If the last value
+is called to be removed the entire key/value is removed from the file.
+.El
 .Pp
 .Sh DESCRIPTION 
 This utility will 'get' (-i.e., print to stdout) and/or 'set' (i.e.,
@@ -55,7 +74,7 @@ the key/value being changed, sysconf will try to determine if the
 value needs quotes or a termination character and either spaces or an
 equal sign or colon separation character).
 .Pp
-This utility can also add and subtract values to a key with 
+This utility can also add and delete values to a key with 
 .Cm +=
 and 
 .Cm -=.
@@ -112,20 +131,27 @@ section below for 'checking for duplicates'.
 .Pp
 .Em LIST ALL VALUE(S)
 .Pp
-To list off (pretty print) the key/values in a config file just call the program with no arguments. However, the way this program parses the key/value strings may result in slightly odd looking results so you should not try to use this utility to remove duplicate key/values.
+To list off (pretty print) the key/values in a config file just call
+the program with no arguments. However, the way this program parses
+the key/value strings may result in slightly odd looking results so
+you should not try to use this utility to remove duplicate key/values.
+.Pp
 .Bd -literal -offset indent
     % syconf -f /path/config.file
 .Ed
 .Pp
 .Em GET A VALUE
 .Pp
-To retrieve the value from a key in a file call this program with just the key to search for. This utility will only return the value(s) for the given key to better support usage from within a script.
+To retrieve the value from a key in a file call this program with just
+the key to search for. This utility will only return the value(s) for
+the given key to better support usage from within a script.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key
     % value
 .Ed
 .Pp
-If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the 
+If there is a need to produce the key as well as the value in the
+output of a 'get a value' operation, the 
 .Li -n
 switch can be used.
 .Bd -literal -offset indent
@@ -135,17 +161,32 @@ switch can be used.
 .Pp
 .Em CHANGE VALUE(S)
 .Pp
-To change a value associated with a key use the equal (=) sign. A change will only be made if the value does not match what is currently in the config file -i.e., if the value to be assigned is already the same as it is in the config file, no change is made.
+To change a value associated with a key use the equal ( 
+.Cm =
+) sign. A
+change will only be made if the value does not match what is currently
+in the config file -i.e., if the value to be assigned is already the
+same as it is in the config file, no change is made.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key=value
 .Ed
 .Pp
-To add to a value associated with a key use a plus-equal (+=). A change will only be added if the value does not already exist in the config value string -i.e., if the value to be assigned is already part of the config file value, no change is made.
+To add to a value associated with a key use a plus-equal ( 
+.Cm +=
+). A
+change will only be added if the value does not already exist in the
+config value string -i.e., if the value to be assigned is already part
+of the config file value, no change is made.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key+=value
 .Ed
 .Pp
-To remove a value associated with a key use a minus-equal (-=). A change will only be made if the value exists in the config file value string. And when the last value for the given key is called out to be removed the key will also be removed from the file.
+To remove a value associated with a key use a minus-equal ( 
+.Cm -=
+). A
+change will only be made if the value exists in the config file value
+string. And when the last value for the given key is called out to be
+removed the key will also be removed from the file.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file key-=value
 .Ed
@@ -164,10 +205,16 @@ or use single quotes to surround the string.
 .Pp
 .Em CHECKING FOR DUPLICATES
 .Pp
-To search for duplicate values in a configuration file against a default configuration file key values, use the -f and -d flags.
+To search for duplicate values in a configuration file against a
+default configuration file key values, use the -f and -d flags.
 .Bd -literal -offset indent
     % sysconf -f /path/config.file -d /path/config.file.defaults
 .Ed
+.Pp
+.Sh EXIT 
+The 
+.Nm
+utility exits 0 on success, and >0 if an error occurs.
 .Pp
 .Sh HISTORY 
 Created for my personal use.
