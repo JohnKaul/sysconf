@@ -127,9 +127,9 @@ int main(int argc, char *argv[]) {
   // -Parse the config file.
   config_array = parse_config(file_string, &config_count, delimiters);
 
-  // -If we couldn't parse the file, quit.
+  // -If we couldn't allocate memory, quit.
   if (!config_array) {
-    printf("Failed to parse the configuration file: %s\n", file_string);
+    printf("Failed to allocate memory for configuration\n");
     return 1;
   }
 

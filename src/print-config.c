@@ -414,11 +414,19 @@ void writevariable(const char *key, char **value, int count, const char *filenam
   char quote_char[2] = "";
   quote_char[0] = '"';
 
+  // Strip the trailing '+' or '-' from key if present
+  char *clean_key = strdup(key);
+  size_t key_len = strlen(clean_key);
+  if (key_len > 0 && (clean_key[key_len-1] == '+' || clean_key[key_len-1] == '-')) {
+      clean_key[key_len-1] = '\0';
+  }
+
   char *value_assembled = assemble_strings(value, count);
 
   // Construct the new line
-  fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
+  fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", clean_key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
 
   free(value_assembled);
+  free(clean_key);
   fclose(conf_file);
 }

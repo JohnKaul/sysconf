@@ -181,8 +181,13 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
     if (!file) {
-        // If file doesn't exist, we don't want to create it here.
-        return NULL;
+        // If file doesn't exist, return an empty config array to allow writing new files
+        config_t* config = calloc(1, sizeof(config_t));
+        if (!config) {
+            return NULL;
+        }
+        *count = 0;
+        return config;
     }
 
     int lines = 0;                                      /* Count the number of lines */
