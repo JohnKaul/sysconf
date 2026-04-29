@@ -58,7 +58,10 @@ sysconf: $(HEADERS) cleanobjs
 .PHONY: test
 test: $(HEADERS) $(TEST_HEADERS)
 	TEST='test_sysconf'
-		@$(CC) $(CFLAGS) -I test $(INCPATH) -o test_sysconf $(TEST_SOURCES)
+		@$(CC) $(CFLAGS) -I test $(INCPATH) -o test/test_sysconf $(TEST_SOURCES)
+		@$(CC) $(CFLAGS) -I test $(INCPATH) -o test/repro_match test/repro_match.c src/parse-config.c
+		@./test/test_sysconf
+		@./test/repro_match test/test.conf
 
 .PHONY: clean
 clean:

@@ -23,8 +23,8 @@ void printconfigfile(config_t* config_array, int array_count ){
     // Get the values associated with the argument passed to this function.
     char **config_line_array = get_value(config_array, array_count, config_array[i].values[0]);
 
-    // If the value cannot be found, just exit.
-    if (config_line_array == NULL) return;
+    // If the value cannot be found, just continue.
+    if (config_line_array == NULL) continue;
 
     printf("%-10s\t=\t", config_array[i].values[0]);
     // just itterate the line array.
@@ -51,21 +51,24 @@ void printconfigfile(config_t* config_array, int array_count ){
  * @return int          New size of array.
  */
 int add_to_array(char ***argvp, int size, const char *string) {
-    // Reallocate memory for the new size of the array
-    char **new_array = realloc(*argvp, (size + 1) * sizeof(char *));
+    // Reallocate memory for the new size of the array (size + 1 for new element + 1 for NULL)
+    char **new_array = realloc(*argvp, (size + 2) * sizeof(char *));
     if (new_array == NULL) {
-        return -1; // Memory allocation failed
+        return -1;
     }
 
-    *argvp = new_array;                                 /* Update the original pointer to point to the new array */
+    *argvp = new_array;
 
     // Allocate memory for the new string and add it to the array
-    (*argvp)[size] = strndup(string, strlen(string));
+    (*argvp)[size] = strdup(string);
     if ((*argvp)[size] == NULL) {
-      return -1;                                      /* Memory allocation for the string failed */
+        return -1;
     }
 
-    return size + 1;                                    /* Return the new size of the array */
+    // Ensure NULL termination
+    (*argvp)[size + 1] = NULL;
+
+    return size + 1;
 }
 
 /**
@@ -142,12 +145,11 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     }
 
     char buffer[1024];                                  /* buffer stores the line */
-    int start = count;
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
-        if (strncmp(key, str, strlen(key)) == 0 ) {
-//:~              && \ strncmp(key, str, strlen(str)) == 0) {
+        size_t key_len = strlen(key);
+        if (strncmp(key, str, key_len) == 0 && (isspace((unsigned char)str[key_len]) || str[key_len] == '=' || str[key_len] == ':' || str[key_len] == '\0')) {
             // If we've found this key before, skip it and move on.
             if (found == 1)
                 continue;
@@ -167,8 +169,6 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 int comment = 0;                        /* used a a flag when an inline comment is found. */
                 int comment_pos = 0;                    /* used as a starting point in a loop counter to
                                                            add any inline comments back to string. */
-
-                int new_count = 1;
 
                 if (strnstr(str, "=", strlen(str))) separator = '=';
                 if (strnstr(str, ":", strlen(str))) separator = ':';
@@ -217,76 +217,97 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 //      the config file value array.
                 //   2. Assemble the arrays.
                 char **current_config_array = NULL;
-                char **new_config_array = NULL;         /* Array used to add only items in current config_array
-                                                         * that are not called out to be removed.
-                                                         */
+                char **work_value_array = NULL;         /* Local array for assembly */
+                int work_value_count = count;
                 int argc;
-                int i = 1;
-                if (strstr(value[0], "+") != NULL) {
-                  char delimiters[] = " \t\n\"\':=;";
-                  // 1. tokenize the buffer,
-                  // 2. Add the rest of the values to the token array `current_config_array'
-                  // 3. Remove the `key` postion from the `current_config_array` array.
-                  // 4. Replace the `value` array with the new array `current_config_array`.
-                  argc = make_argv(str, delimiters, &current_config_array);
-                  for (; i < argc; i++) {
 
-                    // Do not add any "inline comments".
-                    if(memcmp(current_config_array[i], "#", 1) == 0) {
+                // tokenize the current line to check for inline comments
+                {
+                  char delimiters[] = " \t\n\"\':=;";
+                  argc = make_argv(str, delimiters, &current_config_array);
+                  for (int j = 0; j < argc; j++) {
+                    if (memcmp(current_config_array[j], "#", 1) == 0) {
                       comment = 1;
-                      comment_pos = i;
+                      comment_pos = j;
                       break;
                     }
-                    count = add_to_array(&value, count, current_config_array[i]);
                   }
                 }
 
-                if (strstr(value[0], "-") != NULL) {
+                // Initialize work_value_array with current value array
+                work_value_array = calloc(count + 1, sizeof(char *));
+                if (!work_value_array) {
+                    fclose(conf_file);
+                    fclose(temp_file);
+                    return 1;
+                }
+                for (int j = 0; j < count; j++) {
+                    work_value_array[j] = strdup(value[j]);
+                }
+                work_value_array[count] = NULL;
 
-                  // XXX: make delimiters a global variable which can be referenced here.
-                  char delimiters[] = " \t\n\"\':=;";
-                  argc = make_argv(str, delimiters, &current_config_array);
+                int i = 1;
+                if (strstr(work_value_array[0], "+") != NULL) {
+                  for (; i < argc; i++) {
+                    // Do not add any "inline comments".
+                    if(memcmp(current_config_array[i], "#", 1) == 0) {
+                      break;
+                    }
+                    int new_size = add_to_array(&work_value_array, work_value_count, current_config_array[i]);
+                    if (new_size != -1) {
+                        work_value_count = new_size;
+                    }
+                  }
+                }
 
-                  /* If there are only two items in the line, and the
-                   * argument to remove is the same as what is there,
-                   * skip tring to recreate the string for output.
-                   */
+                if (strstr(work_value_array[0], "-") != NULL) {
                   if (argc == 2 && \
                       strcmp(value[1], current_config_array[1]) == 0) {
-//:~                        strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
                     printf("Last value for key removed. Key removed from file.\n");
                     for (int j = 0; current_config_array[j] != NULL; j++) {
-                        free(current_config_array[j]);  /* Free each string */
+                        free(current_config_array[j]);
                     }
-                    free(current_config_array);         /* Free the array itself */
-                    current_config_array = NULL;        /* avoid dangling pointer */
+                    free(current_config_array);
+                    current_config_array = NULL;
+                    
+                    for (int j = 0; j < work_value_count; j++) free(work_value_array[j]);
+                    free(work_value_array);
                     continue;
                   }
+
+                  char **minus_config_array = calloc(2, sizeof(char *));
+                  minus_config_array[0] = strdup(work_value_array[0]);
+                  int minus_count = 1;
 
                   for (; i < argc; i++) {
                     if (count >= 1 && \
                         strcmp(value[1], current_config_array[i]) != 0) {
 
-                      // Do not add any "inline comments".
                       if(memcmp(current_config_array[i], "#", 1) == 0) {
-                        comment = 1;
-                        comment_pos = i;
                         break;
                       }
-
-                      new_count = add_to_array(&new_config_array, new_count, current_config_array[i]);
+                      int new_minus_count = add_to_array(&minus_config_array, minus_count, current_config_array[i]);
+                      if (new_minus_count != -1) {
+                          minus_count = new_minus_count;
+                      }
                     }
                   }
-                  value = new_config_array;
-                  count = new_count;
-                  start += 1;
+                  
+                  for (int j = 0; j < work_value_count; j++) free(work_value_array[j]);
+                  free(work_value_array);
+                  work_value_array = minus_config_array;
+                  work_value_count = minus_count;
                 }
 
                 // Assemble the new value string
-                value_assembled = assemble_strings(value, count);
-
-
+                value_assembled = assemble_strings(work_value_array, work_value_count);
                 if (value_assembled == NULL) {
+                    for (int j = 0; j < work_value_count; j++) free(work_value_array[j]);
+                    free(work_value_array);
+                    if (current_config_array) {
+                        for (int j = 0; current_config_array[j] != NULL; j++) free(current_config_array[j]);
+                        free(current_config_array);
+                    }
                     fclose(conf_file);
                     fclose(temp_file);
                     fprintf(stderr, "Unable to create final value string for config file writing.\n");
@@ -303,6 +324,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 char *new_line = malloc(new_line_length + 1); // +1 for null terminator
                 if (new_line == NULL) {
                     free(value_assembled);
+                    for (int j = 0; j < work_value_count; j++) free(work_value_array[j]);
+                    free(work_value_array);
+                    if (current_config_array) {
+                        for (int j = 0; current_config_array[j] != NULL; j++) free(current_config_array[j]);
+                        free(current_config_array);
+                    }
                     fclose(conf_file);
                     fclose(temp_file);
                     fprintf(stderr, "Unable to allocate memory for new replacement string.\n");
@@ -311,7 +338,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 // Construct the new line
                 char *ptr = new_line;
-                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c\n",
+                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c",
                     key,
                     spaces_before, "",
                     separator,
@@ -325,25 +352,22 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 fputs(new_line, temp_file);
 
                 // Add any inline comments back into the string.
-                if (comment != 0) {
+                if (comment != 0 && current_config_array != NULL) {
                     fputs("     ", temp_file);
                     for (int j = comment_pos; current_config_array[j] != NULL; j++) {
                         fputs(current_config_array[j], temp_file);
-                        fputs(" ", temp_file);
+                        if (current_config_array[j+1] != NULL) fputs(" ", temp_file);
                     }
                 }
 
                 fputs("\n", temp_file);
 
-                /* Prompt via STDOUT for the config file changes. */
-                if (current_config_array) {
-                  // If we had to construct a `current_config_array` this means we did a set
-                  // operation (+= or -=) so we should show that change.
-                  printf("%s:", key);
-                  for (int j = 1; current_config_array[j] != NULL; j++) {
-                    printf(" %s",current_config_array[j]);
-                  }
-                  printf(" -> %s \n", value_assembled);
+                if (current_config_array != NULL) {
+                    for (int j = 0; current_config_array[j] != NULL; j++) {
+                        free(current_config_array[j]);
+                    }
+                    free(current_config_array);
+                    current_config_array = NULL;
                 }
 
                 free(new_line);
@@ -351,10 +375,9 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 free(value_assembled);
 
-                for(int i = start; i < count; i++) free(value[i]);
-
-                free(new_config_array);
-                new_config_array = NULL;
+                for (int j = 0; j < work_value_count; j++) free(work_value_array[j]);
+                free(work_value_array);
+                work_value_array = NULL;
 
                 found = 1;
             }
@@ -365,8 +388,10 @@ int replacevariable(const char *key, char **value, int count, const char *filena
     }
     fclose(conf_file);
     fclose(temp_file);
-    remove(filename);
-    rename(".sys.conf.file.tmp", filename);
+    if (rename(".sys.conf.file.tmp", filename) != 0) {
+        perror("Error renaming temporary file");
+        return 1;
+    }
     return 0;
 }
 
@@ -393,9 +418,6 @@ void writevariable(const char *key, char **value, int count, const char *filenam
 
   // Construct the new line
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
-
-  /* Prompt via STDOUT the config file changes */
-  printf("%-5s: %s = %s\n", filename, key, value[1]);
 
   free(value_assembled);
   fclose(conf_file);

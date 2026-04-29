@@ -12,6 +12,7 @@ v1.1.2 - 2026-05-04
   closed.
 - Corrected issue where strings were not being matched exactly in
   either key or value.
+- Fixed memory leaks, added tests.
 
 v1.1.1 - 2026-04-29
 - Corrected read-after-free bug.

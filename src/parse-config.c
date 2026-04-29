@@ -63,7 +63,7 @@ int count_tokens(const char *input_string, const char *delimiters) {
  */
 int populate_array(const char *input_string, const char *delimiters, char ***argvp, int tokens) {
     const char *stash = input_string + strspn(input_string, delimiters);
-    char *tokenized_string = strndup(stash, strlen(stash));
+    char *tokenized_string = strdup(stash);
     if (tokenized_string == NULL) {
         return -1;
     }
@@ -75,7 +75,7 @@ int populate_array(const char *input_string, const char *delimiters, char ***arg
             break;                                      // Exit the loop if no more tokens are available
         }
 
-        if (((*argvp)[i] = strndup(token, strlen(token))) == NULL) {
+        if (((*argvp)[i] = strdup(token)) == NULL) {
             // Free previously allocated strings on error
             for (int j = 0; j < i; j++) {
                 free((*argvp)[j]);
@@ -137,7 +137,6 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
   for (int i = 0; i < count; i++) {
     if (config[i].values != NULL && \
         config[i].values[0] != NULL) {
-//:~        if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
       if (strcmp(config[i].values[0], name) == 0) {
         return &config[i];
       }
@@ -158,7 +157,6 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
  */
 int contains(char **array, int size, const char *value) {
     for (int i = 0; i < size; i++) {
-//:~          if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
         if (array[i] != NULL && strcmp(array[i], value) == 0) {
             return 1; // Found
         }
@@ -182,15 +180,8 @@ int contains(char **array, int size, const char *value) {
 config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // Open the configuration file
     FILE* file = fopen(filename, "r");
-    // If we cannot open the file for 'read', assume it doesn't exist
-    // and open for 'write' (to create it).
     if (!file) {
-      file = fopen(filename, "w");
-    }
-    // If we still don't have a file, we must have some situation
-    // where we cannot create one. Report why and exit.
-    if (!file) {
-        fprintf(stderr, "%s\n", strerror(errno));
+        // If file doesn't exist, we don't want to create it here.
         return NULL;
     }
 
@@ -216,8 +207,8 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
       lines++;
     }
 
-    // Allocate memory for the configuration data
-    config_t* config = malloc((lines * 1) * sizeof(config_t));
+    // Allocate memory for the configuration data, use calloc to ensure zero-initialization
+    config_t* config = calloc(lines, sizeof(config_t));
     if (!config) {
         fclose(file);
         return NULL;
@@ -228,7 +219,7 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
 
     // Parse the configuration file
     int i = 0;
-    while (fgets(buffer, sizeof(buffer), file)) {
+    while (i < lines && fgets(buffer, sizeof(buffer), file)) {
       char *str = buffer;
       while (isspace(*str)) str++;
       if (*str == '\0' || \
@@ -246,8 +237,12 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
       if (argc > 0) {
         config[i].values = argv;
         config[i].value_count = argc;
+        i++;
+      } else {
+        if (argv) {
+            free(argv);
+        }
       }
-      i++;
     }
 
     *count = i;
@@ -267,7 +262,8 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
  */
 char **get_value(config_t* config, int count, const char* name) {
     for (int i = 0; i < count; i++) {
-      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+      if (config[i].values != NULL && config[i].values[0] != NULL && \
+          strcmp(config[i].values[0], name) == 0) {
         return config[i].values;
       }
   }
