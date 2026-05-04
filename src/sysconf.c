@@ -179,6 +179,7 @@ int main(int argc, char *argv[]) {
     // 1. being searched for; if so, exit.
     // 2. wanting to be added; if so, add it.
     if (config_line_array == NULL) {
+
       if(arg_count == 1) {                              /* Seems to be a simple search situation,
                                                            since, we do not have a key in the config
                                                            file, we exit.*/
@@ -193,7 +194,16 @@ int main(int argc, char *argv[]) {
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
-        printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
+//:~          printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
+
+        /* In the condition where the key is not found we need to check to see if the string is not
+         * a += or -= operation.  */
+        if ((strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) ||
+            (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL)) {
+          printf("Incorrect syntax. Key is not found in config file.\n");
+          return 1;
+        }
+
         writevariable(arg_array[0], arg_array, arg_count, file_string);
 
         for (int i = 0; i < arg_count; i++) free(arg_array[i]);
@@ -242,10 +252,10 @@ int main(int argc, char *argv[]) {
 
       // -Determine if we have a change to make; compare the `arg_array`
       //  and the `config_array` values.
-      if (contains(config_line_array, i, arg_array[1]) == 0) {          /* 0 = value not fount... */
+      if (contains(config_line_array, i, arg_array[1]) == 0) {          /* 0 = A value was not found in the key's string... */
 
-        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* if the user wants to subtract a value
-                                                                           but the value was not found so exit. */
+        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* However, if the user wants to subtract a value
+                                                                           but the value was not found, we need to exit. */
           printf("Value not found in value string. No change made.\n");
 
           for (int i = 0; i < arg_count; i++) free(arg_array[i]);
@@ -259,69 +269,21 @@ int main(int argc, char *argv[]) {
           return 0;
         }
 
-        if (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL) { /* if the user wants to set an additional value... */
-          printf("%s: ", config_line_array[0]);
-
-         for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-           if (memcmp(config_line_array[i], "#", 1) == 0)
-               break;
-           printf("%s ", config_line_array[i]);
-         }
-
-         printf("-> %s ", arg_array[1]);
-
-         for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-           if (memcmp(config_line_array[i], "#", 1) == 0)
-               break;
-           printf("%s ", config_line_array[i]);
-         }
-         printf("\n");
-
-        } else {                                                        /* just a simple = statement */
-          // replacing a variable...
-          printf("%s: %s -> %-5s\n", config_line_array[0], config_line_array[1], arg_array[1]);
-        }
-
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
         /* LOGIC:
          * - The concept is to free `arg_array` up to the `arg_count`, and allow the
          *   `print-config.c` to free the additional value(s) added to the `arg_array`.
          */
-//:~          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-//:~          free(arg_array);
         arg_array = NULL;
 
         free_config(config_array, config_count);
         free(config_array);
         config_array = NULL;
 
-//:~          for (int i = 0; config_line_array[i] != NULL; i++) free(config_line_array[i]);
-//:~          free(config_line_array);
-//:~          config_line_array = NULL;
-
         return 0;
 
       } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
-        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) {/* Check if the user wants a subtraction... */
-          printf("%s: ", config_line_array[0]);
-
-          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-            if (memcmp(config_line_array[i], "#", 1) == 0)
-              break;
-            printf("%s ", config_line_array[i]);
-          }
-
-          printf("-> ");
-
-          for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-            if(strcmp(config_line_array[i], arg_array[1]) != 0) {
-              if (memcmp(config_line_array[i], "#", 1) == 0)
-                break;
-              printf("%s ", config_line_array[i]);
-            }
-          }
-          printf("\n");
 
           replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
@@ -343,7 +305,6 @@ int main(int argc, char *argv[]) {
         } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
         }
-      }
     }   /* end_ if(arg_count > 1)  */
   }     /* end_ if(arg_count >= 1) */
 
@@ -355,7 +316,6 @@ int main(int argc, char *argv[]) {
   free_config(config_array, config_count);
   free(config_array);
   config_array = NULL;
-
 
   return 0;
 } ///:~

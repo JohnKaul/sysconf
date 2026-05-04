@@ -252,7 +252,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                    * skip tring to recreate the string for output.
                    */
                   if (argc == 2 && \
-                      strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
+                      strcmp(value[1], current_config_array[1]) == 0) {
+//:~                        strncmp(value[1], current_config_array[1], strlen(value[1])) == 0) {
                     printf("Last value for key removed. Key removed from file.\n");
                     for (int j = 0; current_config_array[j] != NULL; j++) {
                         free(current_config_array[j]);  /* Free each string */
@@ -264,7 +265,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                   for (; i < argc; i++) {
                     if (count >= 1 && \
-                        strncmp(value[1], current_config_array[i], strlen(current_config_array[i])) != 0) {
+                        strcmp(value[1], current_config_array[i]) != 0) {
 
                       // Do not add any "inline comments".
                       if(memcmp(current_config_array[i], "#", 1) == 0) {
@@ -283,6 +284,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 // Assemble the new value string
                 value_assembled = assemble_strings(value, count);
+
+
                 if (value_assembled == NULL) {
                     fclose(conf_file);
                     fclose(temp_file);
@@ -332,11 +335,16 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 fputs("\n", temp_file);
 
-                for (int j = 0; j < argc; j++) {
-                  free(current_config_array[j]);        /* Free each string */
+                /* Prompt via STDOUT for the config file changes. */
+                if (current_config_array) {
+                  // If we had to construct a `current_config_array` this means we did a set
+                  // operation (+= or -=) so we should show that change.
+                  printf("%s:", key);
+                  for (int j = 1; current_config_array[j] != NULL; j++) {
+                    printf(" %s",current_config_array[j]);
+                  }
+                  printf(" -> %s \n", value_assembled);
                 }
-                free(current_config_array);             /* Free the array itself */
-                current_config_array = NULL;            /* avoid dangling pointer */
 
                 free(new_line);
                 new_line = NULL;
@@ -385,6 +393,9 @@ void writevariable(const char *key, char **value, int count, const char *filenam
 
   // Construct the new line
   fprintf(conf_file, "%s%*s%c%*s%s%s%s%c\n", key, spaces_before, "", separator, spaces_after, "", quote_char, value_assembled, quote_char, terminator);
+
+  /* Prompt via STDOUT the config file changes */
+  printf("%-5s: %s = %s\n", filename, key, value[1]);
 
   free(value_assembled);
   fclose(conf_file);
