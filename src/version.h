@@ -1,1 +1,1 @@
-const char program_version[] = "1.1.2";
+const char program_version[] = "1.2.0";

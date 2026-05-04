@@ -1,6 +1,11 @@
 # Changelog
 
-This project adheres to Semantic Versioning (https://semver.org/).
+v1.2.0 - 2026-05-04
+- SoC: Moved printing (to STDOUT) from `sysconf.c` to the `print-config.c`.
+- Cleaned up memory managment.
+- Removed reference to "Semantic Versioning". This should allow me to
+  version any code related changes that do not add features or are for
+  bug/issue fixes.
 
 v1.1.2 - 2026-05-04
 - Corrected config file creating portion whereas file was immediately
