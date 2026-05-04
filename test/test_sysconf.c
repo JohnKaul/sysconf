@@ -27,7 +27,7 @@ int tests_run = 0;
  * PASS:    if array count = 2.
  *          mu_run_test("test_make_argv", "error, arg_count != 1", test_make_argv);
  */
-static char * test_make_argv() {    /* {{{ */
+static char * test_make_argv() {
   int arg_count = 0;
   char delimiters[] = "=";
   char *arg_string = NULL;                              /* Used to store the argument string. */
@@ -40,7 +40,6 @@ static char * test_make_argv() {    /* {{{ */
   mu_assert(arg_count == 2);
   return 0;
 }
-/* }}} */
 
 /**
  *: test_contains
@@ -50,7 +49,7 @@ static char * test_make_argv() {    /* {{{ */
  * PASS:    if `contains()` returns 1 when cheking for a value.
  *          mu_run_test("test_contains", "error, array does not contain \"value\"", test_contains);
  */
-static char * test_contains() {     /* {{{ */
+static char * test_contains() {
   int arg_count = 0;
   char delimiters[] = "=";
   char *arg_string = NULL;                              /* Used to store the argument string. */
@@ -63,7 +62,34 @@ static char * test_contains() {     /* {{{ */
 
   return 0;
 }
-/* }}} */
+
+/**
+ *: test_contains_exact
+ * @brief               makes an array from a string, and checks to
+ *                      see if the resulted array contains an exact value.
+ *
+ * PASS:    if `contains()` returns 1 when a value is found.
+ *          mu_run_test("test_contains", "error, array does not contain \"value\"", test_contains);
+ */
+static char * test_contains_exact() {
+  int arg_count = 0;
+  char delimiters[] = "=";
+  char *arg_string = NULL;                              /* Used to store the argument string. */
+  arg_string = "key.sub=value.sub.sub";
+  char **arg_array;                                     /* Used to store the argument
+                                                           string pointer array */
+  arg_count = make_argv(arg_string, delimiters, &arg_array);
+
+  mu_assert(contains(arg_array, arg_count, "value.sub") == 0);
+  /* `contains()` returns 0 = Not found. 1 = found. So, we do not want
+   * a match for a substring of a string.
+   */
+
+  arg_string = "key.sub=value";
+  mu_assert(contains(arg_array, arg_count, "value.sub") == 0);
+
+  return 0;
+}
 
 /**
  *: test_add_to_array
@@ -73,7 +99,7 @@ static char * test_contains() {     /* {{{ */
  * PASS:        if the value to add gets appended to array.
  *              mu_run_test("test_add_to_array", "error, array does not contain \"value2\"", test_add_to_array);
  */
-static char * test_add_to_array() {     /* {{{ */
+static char * test_add_to_array() {
   int arg_count = 0;
   char delimiters[] = "=";
   char *arg_string = NULL;                              /* Used to store the argument string. */
@@ -88,7 +114,6 @@ static char * test_add_to_array() {     /* {{{ */
 
   return 0;
 }
-/* }}} */
 
 /**
  *: test_assemble_strings
@@ -98,7 +123,7 @@ static char * test_add_to_array() {     /* {{{ */
  * PASS:        if one string is returned.
  *              mu_run_test("test_asseble_strings", "error, assembled string does not equal \"value\"", test_assemble_strings);
  */
-static char * test_assemble_strings() {     /* {{{ */
+static char * test_assemble_strings() {
   int arg_count = 0;
   char delimiters[] = "=";
   char *arg_string = NULL;                              /* Used to store the argument string. */
@@ -120,7 +145,6 @@ static char * test_assemble_strings() {     /* {{{ */
 
   return 0;
 }
-/* }}} */
 
 //** TEST RUNNER **//
 // This function just runs all test functions.
@@ -131,6 +155,7 @@ static char * all_tests() {
      */
     mu_run_test("test_make_argv", "error, arg_count != 1", test_make_argv);
     mu_run_test("test_contains", "error, array does not contain \"value\"", test_contains);
+    mu_run_test("test_contains_exact", "error, contains() found a match for: \"value.sub\" in: \"key.sub=value.sub.sub\"", test_contains_exact);
     mu_run_test("test_add_to_array", "error, array does not contain \"value2\"", test_add_to_array);
     mu_run_test("test_asseble_strings", "error, assembled string does not match test string", test_assemble_strings);
     return 0;
@@ -138,20 +163,6 @@ static char * all_tests() {
 
 int main() {
   char *result = all_tests();
-  printf("Tests run: %d\n", tests_run);
+  printf("1..%d\n", tests_run);
   return result != 0;
 }
-
-// int main() {
-//     /* main function to call `all_tests()` and report the results */
-//     char *result = all_tests();
-//     if (result != 0) {
-//         printf("%s\n", result);
-//     }
-//     else {
-//         printf("ALL TESTS PASSED\n");
-//     }
-//     printf("Tests run: %d\n", tests_run);
-//
-//     return result != 0;
-// }
