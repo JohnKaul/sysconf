@@ -171,15 +171,13 @@ tests.
 
 ### Version numbering
 Version number MAJOR.MINOR.PATCH:
-- **MAJOR** version when you make incompatible API changes
-- **MINOR** version when you add functionality in a backward compatible manner
-- **PATCH** version when you make backward compatible bug fixes
-
-_NOTE_: loosely based on Semantic Versioning 2.0.0.
+- **MAJOR** Non backward compatible changes
+- **MINOR** Added/improved (backward compatible) functionality/changes
+- **PATCH** Backward compatible bug fixes
 
 #### Commiting
 
-1.  List file(s) on the subject line. If commiting several files
+1.  List file(s) on the subject line. If committing several files
     prefix the subject line with "(MF)"--which stands for "multiple
     files" and separate each file with a comma.
 2.  Separate subject from body with a blank line.
