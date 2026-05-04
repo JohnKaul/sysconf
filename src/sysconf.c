@@ -315,7 +315,7 @@ int main(int argc, char *argv[]) {
           printf("-> ");
 
           for(int i = 1; i < config_count && config_line_array[i] != NULL; i++) {
-            if(strncmp(config_line_array[i], arg_array[1], strlen(config_line_array[i])) != 0) {
+            if(strcmp(config_line_array[i], arg_array[1]) != 0) {
               if (memcmp(config_line_array[i], "#", 1) == 0)
                 break;
               printf("%s ", config_line_array[i]);
