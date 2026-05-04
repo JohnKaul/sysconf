@@ -137,7 +137,8 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
   for (int i = 0; i < count; i++) {
     if (config[i].values != NULL && \
         config[i].values[0] != NULL) {
-      if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+//:~        if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+      if (strcmp(config[i].values[0], name) == 0) {
         return &config[i];
       }
     }
@@ -157,7 +158,8 @@ config_t* find_config_item(config_t* config, const char* name, int count) {
  */
 int contains(char **array, int size, const char *value) {
     for (int i = 0; i < size; i++) {
-        if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
+        if (array[i] != NULL && strcmp(array[i], value) == 0) {
+//:~          if (array[i] != NULL && strncmp(array[i], value, strlen(array[i])) == 0) {
             return 1; // Found
         }
     }
@@ -184,8 +186,8 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
     // and open for 'write' (to create it).
     if (!file) {
       file = fopen(filename, "w");
-      fclose(file);
-      return NULL;
+//:~        fclose(file);
+//:~        return NULL;
     }
     // If we still don't have a file, we must have some situation
     // where we cannot create one. Report why and exit.
@@ -268,6 +270,7 @@ config_t* parse_config(const char* filename, int* count, char *delimiters) {
 char **get_value(config_t* config, int count, const char* name) {
     for (int i = 0; i < count; i++) {
       if (strncmp(config[i].values[0], name, strlen(config[i].values[0])) == 0) {
+//:~        if (strcmp(config[i].values[0], name) == 0) {
         return config[i].values;
       }
   }
