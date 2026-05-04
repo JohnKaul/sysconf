@@ -1,6 +1,7 @@
 #===---------------------------------------------*- makefile -*---===
 #: sysconf
 # This file was automatically generated
+# vim: set noet
 #===--------------------------------------------------------------===
 
 sysconf : HEADERS	=	\
@@ -34,7 +35,7 @@ PREFIX		:=	/usr/local/bin
 MANPATH		:=	/usr/local/share/man/man7
 
 CC			:=	cc
-#-X- CFLAGS		:=	-fno-exceptions -pipe -Wall -W -g -fsanitize=address
+#-X- CFLAGS		:=	-fno-exceptions -pipe -Wall -W -g -fsanitize=address,undefined
 CFLAGS		:=	-fno-exceptions -pipe -Wall -W
 INCPATH		=	-I $(SRCDIR) -I $(SRCDIR)
 REMOVE		:=	rm -f
@@ -50,7 +51,7 @@ OBJECTS = $(SOURCES:.c=.o)
 # if a change was made to a header file then the entire program will
 # be rebuilt.
 
-sysconf: $(HEADERS) ctags cleanobjs
+sysconf: $(HEADERS) cleanobjs
 	SYSCONF_TARGET='sysconf'
 		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
 
@@ -62,10 +63,6 @@ test: $(HEADERS) $(TEST_HEADERS)
 .PHONY: clean
 clean:
 	@$(REMOVE) sysconf $(OBJECTS)
-
-.PHONY: ctags
-ctags:
-	@$(CTAGS) $(SOURCES) .
 
 .PHONY: cleanobjs
 cleanobjs:
@@ -82,6 +79,5 @@ uninstall:
 	$(RM) $(MANPATH)/sysconf.7
 
 .PHONY: all
-all: sysconf
+all: clean sysconf
 
-# vim: set noet
