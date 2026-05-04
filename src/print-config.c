@@ -62,11 +62,9 @@ int add_to_array(char ***argvp, int size, const char *string) {
     // Allocate memory for the new string and add it to the array
     (*argvp)[size] = strndup(string, strlen(string));
     if ((*argvp)[size] == NULL) {
-        return -1;                                      /* Memory allocation for the string failed */
+      return -1;                                      /* Memory allocation for the string failed */
     }
 
-#if __FreeBSD__
-#endif
     return size + 1;                                    /* Return the new size of the array */
 }
 
@@ -148,8 +146,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
-//:~              && \ strncmp(key, str, strlen(str)) == 0) {
         if (strncmp(key, str, strlen(key)) == 0 ) {
+//:~              && \ strncmp(key, str, strlen(str)) == 0) {
             // If we've found this key before, skip it and move on.
             if (found == 1)
                 continue;
@@ -293,7 +291,12 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 // Calculate the length of the new line
-                int new_line_length = strlen(key) + spaces_before + 1 + strlen(value_assembled) + strlen(quote_char) * 2 + spaces_after + strlen(quote_char) + 1; // last 1+ for terminator
+                int new_line_length = strlen(key) + spaces_before + 1 + \
+                                      strlen(value_assembled) + \
+                                      strlen(quote_char) * 2 + \
+                                      spaces_after + \
+                                      strlen(quote_char) + 1; // last 1+ for terminator
+
                 char *new_line = malloc(new_line_length + 1); // +1 for null terminator
                 if (new_line == NULL) {
                     free(value_assembled);
@@ -329,7 +332,7 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 fputs("\n", temp_file);
 
-                for (int j = 0; current_config_array[j] != NULL; j++) {
+                for (int j = 0; j < argc; j++) {
                   free(current_config_array[j]);        /* Free each string */
                 }
                 free(current_config_array);             /* Free the array itself */
