@@ -1,5 +1,5 @@
 //===---------------------------------------------------*- C -*---===
-// File Last Updated: 02.07.25 15:27:30
+// File Last Updated: 05.04.26 21:35:15
 //
 //: main.c
 //
@@ -21,29 +21,32 @@
 // reporting the value for a key only reports the value for the given
 // variable (like using the -n switch with sysrc).
 //
-// So far this utility can preform actions based on the arguments given.
+// This utility can preform actions based on the arguments given.
 // For example:
 //      % sysconf -f <config_file>
-// Will display the cofig_file key=value pair.
+//    Will display the cofig_file key=value pair.
+//
 //      % sysconf -f <config_file> key
-// Will display the config_file key's value.
+//    Will display the config_file key's value.
+//
 //      % sysconf -f <config_file> key=value
-// Will change the config_file value to the value specified as an argument.
+//      % sysconf -f <config_file> key+=value
+//      % sysconf -f <config_file> key-=value
+//    Will change the config_file value to the value specified as an argument.
+//
 //      % sysconf -f <config_file> -d <defaults_config_file>
-// Will check for duplicate value entries for each key in the config_file against the
-// defaults_config_file.
+//    Will check for duplicate value entries for each key in the config_file against the
+//    defaults_config_file.
+//
+// If this utlity is called to set a key/value and the configuration
+// file doesn't exist, it will be created.
 //
 // SYNOPSYS
 //      sysconf -f configfile
-//
 //      sysconf -f configfile -d configfile.defaults
-//
 //      sysconf -f configfile [-n] [key]
-//
 //      sysconf -f configfile [key=value]
-//
 //      sysconf -f configfile [key+=value]
-//
 //      sysconf -f configfile [key-=value]
 //===-------------------------------------------------------------===
 
@@ -196,8 +199,9 @@ int main(int argc, char *argv[]) {
                                                            needs to be appended to the config file.*/
 //:~          printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
 
-        /* In the condition where the key is not found we need to check to see if the string is not
-         * a += or -= operation.  */
+        /* In the condition where the key is not found we need to
+         * check to see if the string is not a += or -= operation
+         * before we append the config file.  */
         if ((strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) ||
             (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL)) {
           printf("Incorrect syntax. Key is not found in config file.\n");
