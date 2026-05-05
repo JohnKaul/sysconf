@@ -19,7 +19,7 @@
 //
 // SAMPLE OUTPUT:
 //      [1] PASS : <testcase>
-//      [2] *ERROR* : <filename> [line: <linenumber>] : <testcase> - <errormessage>
+//      [2] FAIL : <filename> [line: <linenumber>] : <testcase> - <errormessage>
 //      Tests run: 2
 //
 // EXAMPLE 1 (two tests - one pass, one fail):
@@ -39,7 +39,53 @@
 //     // The function `testbar()` should fail.
 //     // This is a sample unit test.
 //     //===-------------------------------------------------------------===
+//      #include <stdio.h>
+//      #include "minunit.h"
+//
+//      int strchk(char *P, char *T) {
+//        if(!P || !T)
+//          return 0;
+//        unsigned len = strlen(P) - 1;
+//        char *endP = P + len;
+//        char *endT = T + len;
+//
+//        for(;
+//            P < endP && T < endT;
+//            ++P, ++T, --endT, --endP)
+//          if(*P != *T || *endP != *endT)
+//            return 0;
+//        return 1;
+//      }
+//
+//      int tests_run = 0;
+//
+//      static char * time_strchk() {
+//        mu_timer(strchk("test", "testing"), 777777);
+//        return 0;
+//      }
+//
+//      static char * all_times() {
+//        mu_run_test("time-test_strchck", NULL, time_strchk);
+//        return 0;
+//      }
+//
+//      int main(int argc, char **argv) {
+//        char *result = all_times();
+//        printf("Tests run: %d\n", tests_run);
+//        return result != 0;
+//      }
+//     // SECOND (ALTERNATE) example with the revised macros.
+//     /**
+//      * @file tests.c
+//      * @brief Example usage of the minunit-style macros
+//      *
+//      * Logic:
+//      *  - Test functions return NULL on success or a malloc'd error string on failure.
+//      *  - all_tests runs tests and returns the first failure (caller must free it).
+//      */
+//
 //     #include <stdio.h>
+//     #include <stdlib.h>
 //     #include "minunit.h"
 //
 //     int tests_run = 0;
@@ -48,39 +94,42 @@
 //     int bar = 4;
 //
 //     static char * test_foo() {
-//         /* Testing if int foo is equal to 7 */
+//         /* If assertion fails, mu_assert returns malloc'd error message */
 //         mu_assert(foo == 7);
-//         return 0;
+//         return NULL;
 //     }
 //
 //     static char * test_bar() {
-//         /* Testing if int bar is equal to 5 */
 //         mu_assert(bar == 5);
-//         return 0;
+//         return NULL;
 //     }
 //
 //     static char * all_tests() {
-//         /* set up a function to run all tests
-//          * We call mu_run_test with a test case label, an error
-//          * message, and the actual test case function to call.
-//          */
-//         mu_run_test("test_foo", "error, foo != 7", test_foo);
-//         mu_run_test("test_bar", "error, bar != 5", test_bar);
-//         return 0;
+//         char *ret;
+//
+//         /* Run test_foo and propagate any error back to caller */
+//         ret = test_foo();
+//         ++tests_run;
+//         if (ret) return ret;
+//
+//         /* Run test_bar and propagate any error back to caller */
+//         ret = test_bar();
+//         ++tests_run;
+//         if (ret) return ret;
+//
+//         return NULL;
 //     }
 //
 //     int main(int argc, char **argv) {
-//         /* main function to run all tests and report the results */
 //         char *result = all_tests();
-//         if (result != 0) {
+//         if (result != NULL) {
 //             printf("%s\n", result);
-//         }
-//         else {
+//             free(result); /* free malloc'd error string */
+//         } else {
 //             printf("ALL TESTS PASSED\n");
 //         }
 //         printf("Tests run: %d\n", tests_run);
-//
-//         return result != 0;
+//         return result != NULL;
 //     }
 //
 // There is also a timing function (macro) built in which should allow
@@ -142,13 +191,16 @@
 //        return result != 0;
 //      }
 //
+// LICENSE
+// You may use the code for any purpose, with the understanding that
+// it comes with NO WARRANTY.
+//
 // HISTORY
 // This originally came from a blog post from John Brewer but I don't
 // think much is left from his original 4 lines of unit testing
-// code/macros, because I've tinkered and refactored to better
+// code/macros, because I've tinkered and refactored slightly to better
 // fit my needs.
 //
-// The blog post had a link of and the following APPENDEX note:
 // [ https://jera.com/techinfo/jtns/jtn002 ]
 //
 // APPENDIX
@@ -159,52 +211,37 @@
 // [ http://www.eskimo.com/~scs/C-faq/q10.4.html ]
 //===-------------------------------------------------------------===
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <sys/time.h>
 
 extern int tests_run;
 
-#define MILLION 1000000L
-#define mu_assert(X) if(!(X)){ errorlocation(__FILE__, __LINE__); } return "PASS";
-#define errorlocation(zFile, iLine)                                            \
-  do {                                                                         \
-    char *message;                                                             \
-    asprintf(&message, "*ERROR* : %s [line: %d]", zFile, iLine);               \
-    return message;                                                            \
+#define mu_assert(X)                                                \
+  do {                                                              \
+    if (!(X)) {                                                     \
+      char *msg = NULL;                                             \
+      asprintf(&msg, "FAIL : %s [line: %d]", __FILE__, __LINE__);   \
+      return msg;                                                   \
+    }                                                               \
   } while (0)
-#define mu_timer(test, iterations)                                             \
-  do {                                                                         \
-  long diftime;                                                                \
-  struct itimerval ovalue, value;                                              \
-  char *message;                                                               \
-  ovalue.it_interval.tv_sec = 0;                                               \
-  ovalue.it_interval.tv_usec = 0;                                              \
-  ovalue.it_value.tv_sec = MILLION; /* a large number */                       \
-  ovalue.it_value.tv_usec = 0;                                                 \
-  if (setitimer(ITIMER_VIRTUAL, &ovalue, NULL) == -1) {                        \
-    asprintf(&message, "Failed to set virtural timer");                        \
-    return message;                                                            \
-  }                                                                            \
-  for (unsigned n = 0; n < iterations; ++n)                                    \
-      test;                                                                    \
-  if (getitimer(ITIMER_VIRTUAL, &value) == -1) {                               \
-    asprintf(&message, "Failed to get virtual timer");                         \
-    return message;                                                            \
-  }                                                                            \
-  diftime = MILLION*(ovalue.it_value.tv_sec - value.it_value.tv_sec) +         \
-              ovalue.it_value.tv_usec - value.it_value.tv_usec;                \
-  asprintf(&message, "%ld (microseconds) [%f (seconds)] / %d (iterations)",    \
-         diftime, diftime/(double)MILLION, iterations);                        \
-    return message;                                                            \
-  } while (0)
-#define mu_run_test(label, errmsg, test)                                       \
-  do {                                                                         \
-    char *message;                                                             \
-    char *ret = test();                                                        \
-    ++tests_run;                                                               \
-    asprintf(&message, "[%d] %s : %s", tests_run, ret, label);                 \
-    if(memcmp("*ERROR*", ret, 7) == 0)                                         \
-       asprintf(&message, "[%d] %s : %s - \"%s\"", tests_run, ret, label, errmsg);\
-    printf("%s\n", message);                                                   \
-    free(message);                                                             \
+
+#define mu_run_test(label, errmsg, test)                            \
+  do {                                                              \
+    char *message = NULL;                                           \
+    char *ret = test();                                             \
+    ++tests_run;                                                    \
+    if (ret) {                                                      \
+      asprintf(&message, "[%d] %s : %s - \"%s\"",                   \
+               tests_run, ret, label, errmsg);                      \
+      printf("%s\n", message);                                      \
+      free(message);       /* Free malloc'd msg from asprintf() */  \
+      free(ret);           /* Free malloc'd ret err from test() */  \
+    } else {                                                        \
+      asprintf(&message, "[%d] PASS : %s", tests_run, label);       \
+      printf("%s\n", message);                                      \
+      free(message);       /* Free malloc'd msg from asprintf() */  \
+    }                                                               \
   } while (0)
