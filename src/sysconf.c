@@ -57,6 +57,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <getopt.h>
 
 //------------------------------------------------------*- C -*------
 // Main
@@ -82,46 +83,36 @@ int main(int argc, char *argv[]) {
   char **arg_array = NULL;
   int arg_count = 0;
 
-  // -Check the command line arguments.
-  //  if there are not enough arguments, exit.
-  if (argc < 3) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-    fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
-    AbortTranslation(abortInvalidCommandLineArgs);
-  }
-
-  // -Parse the command line options.
-  for (int i = 1; i < argc; i++) {
-    if (argv[i] && strlen(argv[i]) > 1 && argv[i][0] == '-') {
-      if (strcmp(argv[i], "-f") == 0) {
-        if (i + 1 < argc) {
-          file_string = argv[++i];
-        } else {
-          fprintf(stderr, "Error: -f requires an argument\n");
-          AbortTranslation(abortInvalidCommandLineArgs);
-        }
-      } else if (strcmp(argv[i], "-d") == 0) {
-        if (i + 1 < argc) {
-          default_string = argv[++i];
-        } else {
-          fprintf(stderr, "Error: -d requires an argument\n");
-          AbortTranslation(abortInvalidCommandLineArgs);
-        }
-      } else if (strcmp(argv[i], "-n") == 0) {
+  // -Parse the command line options using getopt.
+  int opt;
+  while ((opt = getopt(argc, argv, "f:d:n")) != -1) {
+    switch (opt) {
+      case 'f':
+        file_string = optarg;
+        break;
+      case 'd':
+        default_string = optarg;
+        break;
+      case 'n':
         keyvalue_output = 1;
-      } else {
-        fprintf(stderr, "Error: Unknown option %s\n", argv[i]);
+        break;
+      default:
+        fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key] [key=value]\n", argv[0]);
+        fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
         AbortTranslation(abortInvalidCommandLineArgs);
-      }
-    } else {
-      arg_string = argv[i];
     }
   }
 
   // -If there is not a `file_string` variable, quit.
-  if (! file_string) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
+  if (!file_string) {
+    fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key] [key=value]\n", argv[0]);
+    fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
     AbortTranslation(abortInvalidCommandLineArgs);
+  }
+
+  // -Get the remaining non-option argument (if any)
+  if (optind < argc) {
+    arg_string = argv[optind];
   }
 
   // -Parse the config file.
