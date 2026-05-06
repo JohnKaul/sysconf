@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
       }
       if(arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
-//:~          printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
+        //:~          printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
 
         /* In the condition where the key is not found we need to
          * check to see if the string is not a += or -= operation
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 
       } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
 
-          replacevariable(config_line_array[0], arg_array, arg_count, file_string);
+        replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
         /* LOGIC:
          * - The concept is to free `arg_array` up to the `arg_count`,
@@ -297,18 +297,18 @@ int main(int argc, char *argv[]) {
          *   counter to free any remaining value(s) from the
          *   `arg_array`.
          */
-          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-          free(arg_array);
-          arg_array = NULL;
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+        free(arg_array);
+        arg_array = NULL;
 
-          free_config(config_array, config_count);
-          free(config_array);
-          config_array = NULL;
+        free_config(config_array, config_count);
+        free(config_array);
+        config_array = NULL;
 
-          return 0;
-        } else {                                                    /* Assume the user wants to set a value that already exits. */
+        return 0;
+      } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
-        }
+      }
     }   /* end_ if(arg_count > 1)  */
   }     /* end_ if(arg_count >= 1) */
 

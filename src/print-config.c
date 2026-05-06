@@ -120,6 +120,12 @@ char* assemble_strings(char **value, int count) {
 }
 
 /**
+ *: stripspaces
+ * @brief               Strips spaces from `str` and keeps track of indent level.
+ */
+#define stripspaces()  while (isspace(*str) > 0 && *str != '\0') { indent++; str++; }
+
+/**
  *: replacevariable
  * @brief               Replaces a items value in the config file.
  *
@@ -133,7 +139,11 @@ char* assemble_strings(char **value, int count) {
 int replacevariable(const char *key, char **value, int count, const char *filename) {
     FILE* conf_file = fopen(filename, "r");             /* Open config file READONLY */
     FILE* temp_file = fopen(".sys.conf.file.tmp", "w"); /* Open a temp file READ/WRITE */
-    int found = 0;
+    int found = 0;                                      /* Used to keep track of redundant key entries. */
+    int indent = 0;                                     /* keep track of string indent */
+    char buffer[1024];                                  /* buffer stores the line */
+    int start = count;
+
     if (!conf_file || !temp_file) {
         fprintf(stderr, "Unable to create temp file or read config file\n");
         if (conf_file) fclose(conf_file);
@@ -141,14 +151,15 @@ int replacevariable(const char *key, char **value, int count, const char *filena
         return 1;
     }
 
-    char buffer[1024];                                  /* buffer stores the line */
-    int start = count;
-
     while (fgets(buffer, sizeof(buffer), conf_file)) {
         char *str = buffer;
+        indent = 0;                                     /* reset indent level each iteration */
+        stripspaces();                                  /* count and strip spaces */
+
         if (strncmp(key, str, strlen(key)) == 0 ) {
 //:~              && \ strncmp(key, str, strlen(str)) == 0) {
             // If we've found this key before, skip it and move on.
+
             if (found == 1)
                 continue;
 
@@ -223,22 +234,26 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 int argc;
                 int i = 1;
                 if (strstr(value[0], "+") != NULL) {
-                  char delimiters[] = " \t\n\"\':=;";
-                  // 1. tokenize the buffer,
-                  // 2. Add the rest of the values to the token array `current_config_array'
-                  // 3. Remove the `key` postion from the `current_config_array` array.
-                  // 4. Replace the `value` array with the new array `current_config_array`.
-                  argc = make_argv(str, delimiters, &current_config_array);
-                  for (; i < argc; i++) {
 
-                    // Do not add any "inline comments".
-                    if(memcmp(current_config_array[i], "#", 1) == 0) {
-                      comment = 1;
-                      comment_pos = i;
-                      break;
+                  // Should not do! This will negate the output of the rest of the config file. It would
+                  // be better to add a guard like this in the += and -= operations.
+
+                    char delimiters[] = " \t\n\"\':=;";
+                    // 1. tokenize the buffer,
+                    // 2. Add the rest of the values to the token array `current_config_array'
+                    // 3. Remove the `key` postion from the `current_config_array` array.
+                    // 4. Replace the `value` array with the new array `current_config_array`.
+                    argc = make_argv(str, delimiters, &current_config_array);
+                    for (; i < argc; i++) {
+
+                      // Do not add any "inline comments".
+                      if(memcmp(current_config_array[i], "#", 1) == 0) {
+                        comment = 1;
+                        comment_pos = i;
+                        break;
+                      }
+                      count = add_to_array(&value, count, current_config_array[i]);
                     }
-                    count = add_to_array(&value, count, current_config_array[i]);
-                  }
                 }
 
                 if (strstr(value[0], "-") != NULL) {
@@ -294,7 +309,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 }
 
                 // Calculate the length of the new line
-                int new_line_length = strlen(key) + spaces_before + 1 + \
+                int new_line_length = indent  + \
+                                      strlen(key) + spaces_before + 1 + \
                                       strlen(value_assembled) + \
                                       strlen(quote_char) * 2 + \
                                       spaces_after + \
@@ -311,7 +327,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
 
                 // Construct the new line
                 char *ptr = new_line;
-                ptr += snprintf(ptr, new_line_length, "%s%*s%c%*s%s%s%s%c\n",
+                ptr += snprintf(ptr, new_line_length, "%*s%s%*s%c%*s%s%s%s%c\n",
+                    indent, "",
                     key,
                     spaces_before, "",
                     separator,
@@ -356,10 +373,11 @@ int replacevariable(const char *key, char **value, int count, const char *filena
                 free(new_config_array);
                 new_config_array = NULL;
 
-                found = 1;
+                  found = 1;
             }
         } else {
           // Write the original line to the temp file
+          fprintf(temp_file, "%*s", indent, "");
           fputs(str, temp_file);
         }
     }
