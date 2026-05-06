@@ -74,7 +74,7 @@ It is also possible to check a configuration file's key/values against a default
 ## EXAMPLES
 To list off some key/values in a config file.
 ```sh
-    syconf -f /path/config.file
+    sysconf -f /path/config.file
 ```
 
 To retrieve the value from a key in a file.
