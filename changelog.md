@@ -1,6 +1,6 @@
 # Changelog
 
-- process CLI args with getopt
+- process CLI args with getopt #12
 
 v1.3.2 - 2026-05-10
 - Fixed program return codes. 
