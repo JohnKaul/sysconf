@@ -112,29 +112,26 @@ int main(int argc, char *argv[]) {
   char delimiters[] = " \t\n\"\':=;";
   int keyvalue_output = 0;
 
-  // -Check the command line arguments.
-  //  if there are not enough arguments, exit.
-  if (argc < 3) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
+  int opt;
+  while ((opt = getopt(argc, argv, "f:d:n")) != -1) {
+    switch (opt) {
+      case 'f': file_string    = optarg; break;
+      case 'd': default_string = optarg; break;
+      case 'n': keyvalue_output = 1;     break;
+      default:
+        fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key[=value]]\n", argv[0]);
+        fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
+        AbortTranslation(abortInvalidCommandLineArgs);
+    }
+  }
+
+  if (!file_string) {
+    fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key[=value]]\n", argv[0]);
     fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
     AbortTranslation(abortInvalidCommandLineArgs);
   }
 
-  // -Parse the command line options.
-  for (int i = 1; i < argc; i++) {
-    if (argv[i] && strlen(argv[i]) > 1) {
-      if (argv[i][0] != '-') { arg_string = argv[i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'd') { default_string = argv[++i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
-    }
-  }
-
-  // -If there is not a `file_string` variable, quit.
-  if (! file_string) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-    AbortTranslation(abortInvalidCommandLineArgs);
-  }
+  if (optind < argc) arg_string = argv[optind];
 
   // -Keep a record of how many items in the config file.
   int config_count = 0;
@@ -184,7 +181,7 @@ int main(int argc, char *argv[]) {
 
   // -No argument (key = value or key) given so just
   //  print the config values.
-  if(argc == 3) {
+  if (arg_string == NULL) {
     printconfigfile(config_array, config_count);
     free_config(config_array, config_count);
     free(config_array);
