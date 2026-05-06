@@ -41,13 +41,14 @@
 // If this utlity is called to set a key/value and the configuration
 // file doesn't exist, it will be created.
 //
-// SYNOPSYS
-//      sysconf -f configfile
-//      sysconf -f configfile -d configfile.defaults
-//      sysconf -f configfile [-n] [key]
-//      sysconf -f configfile [key=value]
-//      sysconf -f configfile [key+=value]
-//      sysconf -f configfile [key-=value]
+// SYNOPSIS
+//      sysconf [-n] [-d configfile.defaults] -f configfile
+//      sysconf [-n] [-d configfile.defaults] -f configfile key
+//      sysconf [-n] [-d configfile.defaults] -f configfile key=value
+//      sysconf [-n] [-d configfile.defaults] -f configfile key+=value
+//      sysconf [-n] [-d configfile.defaults] -f configfile key-=value
+//
+//      Options (-f, -d, -n) may be given in any order; -f is required.
 //===-------------------------------------------------------------===
 
 #include "parse-config.h"
