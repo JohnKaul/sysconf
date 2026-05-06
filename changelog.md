@@ -1,6 +1,6 @@
 # Changelog
 
-- process CLI args with getopt
+- process CLI args with getopt #12
 
 v1.3.1 - 2026-05-07
 - Added macros to call for cleanup and errors. This cleans up the code
