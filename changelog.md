@@ -1,5 +1,7 @@
 # Changelog
 
+- process CLI args with getopt
+
 v1.3.2 - 2026-05-10
 - Fixed program return codes. 
   program now exits 0 on success, and >0 if an error occurs.
