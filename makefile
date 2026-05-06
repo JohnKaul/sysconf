@@ -61,7 +61,7 @@ test: $(HEADERS) $(TEST_HEADERS) sysconf
 
 .PHONY: clean
 clean:
-	@$(REMOVE) sysconf $(OBJECTS)
+	@$(REMOVE) sysconf test_sysconf $(OBJECTS)
 
 .PHONY: cleanobjs
 cleanobjs:

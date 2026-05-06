@@ -9,15 +9,15 @@ on:
 jobs:
   test:
     runs-on: macos-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Build sysconf
       run: make
-    
+
     - name: Run unit tests
       run: make test && ./test_sysconf
-    
+
     - name: Run syntax tests
-      run: chmod u+x ./test_syntax.sh && ./test_syntax.sh
+      run: chmod u+x ./test/syntax.sh && ./test/syntax.sh

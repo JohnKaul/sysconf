@@ -125,16 +125,16 @@ int main(int argc, char *argv[]) {
       case 'd': default_string = optarg; break;
       case 'n': keyvalue_output = 1;     break;
       default:
-        fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key[=value]]\n", argv[0]);
-        fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
-        AbortTranslation(abortInvalidCommandLineArgs);
+        usage();
+        fprintf(stderr, "Error: Invalid command line arguments\n");
+        return 1;
     }
   }
 
   if (!file_string) {
-    fprintf(stderr, "Usage: %s -f <configuration file> [-d <defaults file>] [-n] [key[=value]]\n", argv[0]);
-    fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
-    AbortTranslation(abortInvalidCommandLineArgs);
+    usage();
+    fprintf(stderr, "Error: No configuration file to edit specified\n");
+    return 1;
   }
 
   if (optind < argc) arg_string = argv[optind];
