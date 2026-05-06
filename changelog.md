@@ -1,5 +1,7 @@
 # Changelog
 
+- Add test cases, CI testing, fix typos.
+
 v1.2.0 - 2026-05-04
 - SoC: Moved printing (to STDOUT) from `sysconf.c` to the `print-config.c`.
 - Cleaned up memory managment.

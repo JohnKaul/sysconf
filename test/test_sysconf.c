@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 int tests_run = 0;
 
@@ -116,6 +117,105 @@ static char * test_add_to_array() {
 }
 
 /**
+ *: test_count_tokens
+ * @brief               Tests counting tokens in a string.
+ *
+ * PASS:    if token count matches expected value.
+ */
+static char * test_count_tokens() {     /* {{{ */
+  int token_count = count_tokens("key=value", "=");
+  mu_assert(token_count == 2);
+  
+  int token_count2 = count_tokens("a b c", " ");
+  mu_assert(token_count2 == 3);
+  
+  int token_count3 = count_tokens("", " ");
+  mu_assert(token_count3 == 0);
+  
+  return 0;
+}
+/* }}} */
+
+/**
+ *: test_parse_config
+ * @brief               Tests parsing a configuration file.
+ *
+ * PASS:    if config is parsed and count is set correctly.
+ */
+static char * test_parse_config() {     /* {{{ */
+  int count = 0;
+  char delimiters[] = "= \n";
+  
+  config_t* config = parse_config("test/test.conf", &count, delimiters);
+  
+  mu_assert(config != NULL);
+  mu_assert(count > 0);
+  
+  free_config(config, count);
+  free(config);
+  
+  return 0;
+}
+/* }}} */
+
+/**
+ *: test_get_value
+ * @brief               Tests retrieving a value from config.
+ *
+ * PASS:    if the correct value is returned.
+ */
+static char * test_get_value() {        /* {{{ */
+  int arg_count = 0;
+  char delimiters[] = "=";
+  char *arg_string = "key=value1 value2";
+  char **arg_array;
+  
+  arg_count = make_argv(arg_string, delimiters, &arg_array);
+  
+  config_t config[1];
+  config[0].values = arg_array;
+  config[0].value_count = arg_count;
+  
+  char **result = get_value(config, 1, "key");
+  mu_assert(result != NULL);
+  mu_assert(strcmp(result[0], "key") == 0);
+  mu_assert(strcmp(result[1], "value1") == 0);
+  
+  return 0;
+}
+/* }}} */
+
+/**
+ *: test_find_config_item
+ * @brief               Tests finding a config item by name.
+ *
+ * PASS:    if the correct config item is found.
+ */
+static char * test_find_config_item() {/* {{{ */
+  char *v1[] = {"setting1", "val1", NULL};
+  char *v2[] = {"setting2", "val2", NULL};
+  char *v3[] = {"setting3", "val3", NULL};
+  
+  config_t config[3];
+  config[0].values = v1;
+  config[0].value_count = 2;
+  config[1].values = v2;
+  config[1].value_count = 2;
+  config[2].values = v3;
+  config[2].value_count = 2;
+  
+  config_t *found = find_config_item(config, "setting2", 3);
+  mu_assert(found != NULL);
+  mu_assert(strcmp(found->values[0], "setting2") == 0);
+  
+  config_t *not_found = find_config_item(config, "nonexistent", 3);
+  mu_assert(not_found == NULL);
+  
+  return 0;
+}
+/* }}} */
+
+/**
  *: test_assemble_strings
  * @brief               tests to see if one char array gets assembled
  *                      from several.
@@ -157,6 +257,10 @@ static char * all_tests() {
     mu_run_test("test_contains", "error, array does not contain \"value\"", test_contains);
     mu_run_test("test_contains_exact", "error, contains() found a match for: \"value.sub\" in: \"key.sub=value.sub.sub\"", test_contains_exact);
     mu_run_test("test_add_to_array", "error, array does not contain \"value2\"", test_add_to_array);
+    mu_run_test("test_count_tokens", "error, token count mismatch", test_count_tokens);
+    mu_run_test("test_parse_config", "error, failed to parse config", test_parse_config);
+    mu_run_test("test_get_value", "error, failed to get config value", test_get_value);
+    mu_run_test("test_find_config_item", "error, failed to find config item", test_find_config_item);
     mu_run_test("test_asseble_strings", "error, assembled string does not match test string", test_assemble_strings);
     return 0;
 }

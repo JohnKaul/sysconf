@@ -40,7 +40,7 @@ Operating systems and user tools have many configuration files which can be kept
 
 The current tool(s) in FreeBSD (`sysrc`) can be made to work on other files other than /etc/rc.conf but the tool does not handle configuration files written in UCL -i.e., with a dot in the name -e.g., jail.conf files. Other configuration settings (like: `sysctl` for kernel settings) are also kept using a different style than UCL. This utility is meant to offer simple key/value changes, for the different configuration styles/languages, in one tool (in lieu of several for example).  Although, this tool--while not being terribly robust and exhaustive--should offer the ability to make changes to many different style configuration key/value entries like the `sysrc` and `sysctl` type of tools with no external library dependencies. Meaning, this tool does not rely on third party libraries to parse UCL, JSON, etc. it uses a simple tokeniser to parse the entries and syntax to make changes/additions. Because this tool does not use external libraries, this ultimately limits it's use--it will not parse XML for example--but should offer a more consistent user interface for making changes to key/value type configuration files.
 
-By design this utility does not have many flags/options to specify actions to preform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+By design this utility does not have many flags/options to specify actions to perform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
 
 Example configuration file syntaxes this utility can parse/change:
 ```conf
@@ -128,7 +128,7 @@ _Real World Example_:
   this utility probably isn't for you then. Sorry, this utility does not
   exist to serve all of your config file needs. -i.e., it does not do
   YMAL, XML, JSON, etc., this is for simple key/value type files and can
-  preform a lot of same operations as `sysrc` for keys or values with
+  perform a lot of same operations as `sysrc` for keys or values with
   non standard characters. For the most part--currently--I do not need
   all these config file languages because this utility is helping me on
   my servers (no GUI, no desktop, no docker, nothing fancy, just dead
@@ -159,7 +159,7 @@ This project also has some unit testing which can be compiled and run.
 ```
 This will compile a file called `test_sysconf`.
 
-This project also has a shell script to preform some syntax type
+This project also has a shell script to perform some syntax type
 tests.
 
 ```sh
