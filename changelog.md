@@ -1,5 +1,8 @@
 # Changelog
 
+v1.3.0 - 2026-05-05
+- Added ability to handle indented key/value strings.
+
 v1.2.0 - 2026-05-04
 - SoC: Moved printing (to STDOUT) from `sysconf.c` to the `print-config.c`.
 - Cleaned up memory managment.
