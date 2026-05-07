@@ -88,12 +88,12 @@ int main(int argc, char *argv[]) {
   }
 
   // -Parse the command line options.
-  for (int i = 0; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     if (argv[i] && strlen(argv[i]) > 1) {
+      if (argv[i][0] != '-') { arg_string = argv[i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'd') { default_string = argv[++i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
-      if (argv[i][0] != '-') { arg_string = argv[i]; }
     }
   }
 
