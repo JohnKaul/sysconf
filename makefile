@@ -56,13 +56,15 @@ sysconf: $(HEADERS) cleanobjs
 		@$(CC) $(CFLAGS) $(INCPATH) -o sysconf $(SOURCES)
 
 .PHONY: test
-test: $(HEADERS) $(TEST_HEADERS)
+test: $(HEADERS) $(TEST_HEADERS) sysconf
 	TEST='test_sysconf'
 		@$(CC) $(CFLAGS) -I test $(INCPATH) -o test_sysconf $(TEST_SOURCES)
+		@./test_sysconf
+		@for t in test/*.sh; do sh $$t; done
 
 .PHONY: clean
 clean:
-	@$(REMOVE) sysconf $(OBJECTS)
+	@$(REMOVE) sysconf test_sysconf $(OBJECTS)
 
 .PHONY: cleanobjs
 cleanobjs:

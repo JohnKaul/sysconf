@@ -14,17 +14,17 @@ A utility to make changes to key/value type system configuration
 files.
 
 ## SYNOPSIS
-sysconf -f configfile
+sysconf [-n] [-d configfile.defaults] -f configfile
 
-sysconf -f configfile -d configfile.defaults
+sysconf [-n] [-d configfile.defaults] -f configfile key
 
-sysconf -f configfile [-n] [key]
+sysconf [-n] [-d configfile.defaults] -f configfile key=value
 
-sysconf -f configfile [key=value]
+sysconf [-n] [-d configfile.defaults] -f configfile key+=value
 
-sysconf -f configfile [key+=value]
+sysconf [-n] [-d configfile.defaults] -f configfile key-=value
 
-sysconf -f configfile [key-=value]
+Options (`-f`, `-d`, `-n`) may be given in any order; `-f` is required.
 
 ## OPTIONS
 -f      Configuration file
@@ -74,7 +74,7 @@ It is also possible to check a configuration file's key/values against a default
 ## EXAMPLES
 To list off some key/values in a config file.
 ```sh
-    syconf -f /path/config.file
+    sysconf -f /path/config.file
 ```
 
 To retrieve the value from a key in a file.
@@ -159,12 +159,13 @@ This project also has some unit testing which can be compiled and run.
 ```
 This will compile a file called `test_sysconf`.
 
-This project also has a shell script to preform some syntax type
-tests.
+This project also has shell scripts to perform syntax and CLI option
+ordering tests.
 
 ```sh
-    $ chmod u+x ./test_syntax.sh
-    $ ./test_syntax.sh
+    $ chmod u+x ./test/syntax.sh ./test/getopt.sh
+    $ ./test/syntax.sh
+    $ ./test/getopt.sh
 ```
 
 ## CONTRIBUTION GUIDELINES
