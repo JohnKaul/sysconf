@@ -1,5 +1,18 @@
 # Changelog
 
+v1.3.1 - 2026-05-07
+- Added macros to call for cleanup and errors. This cleans up the code
+  a bit and makes it more standarized (less code duplication and
+  errors, now consitatly print to stderr).
+- Added support to supply arguments in any order. This allows the
+  ability to call the program in a number of different ways such as:
+     % sysconf -n -f <file.conf> key=value
+     % sysconf -f <file.conf> -n key=value
+     % sysconf key=value -n -f <file.conf>
+     ...
+- Changed argument count index to 1 (instead of 0) to skip program
+  name (index 0).
+
 v1.3.0 - 2026-05-05
 - Added ability to handle indented key/value strings.
 
