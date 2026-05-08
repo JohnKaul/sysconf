@@ -17,7 +17,7 @@ jobs:
       run: make
     
     - name: Run unit tests
-      run: make test && ./test_sysconf
+      run: make test && ./test/test_sysconf
     
     - name: Run syntax tests
       run: chmod u+x ./test_syntax.sh && ./test_syntax.sh
