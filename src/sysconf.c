@@ -61,6 +61,39 @@
 #include <string.h>
 #include <ctype.h>
 
+//---[ MACROS ]------------------------------------------------------
+#define clean_argarray()                                        \
+  do {                                                          \
+    if(arg_array) {                                             \
+      if(arg_count) {                                           \
+        for (int i = 0; i < arg_count; i++) free(arg_array[i]); \
+      }                                                         \
+      free(arg_array);                                          \
+      arg_array = NULL;                                         \
+    }                                                           \
+  } while (0)
+
+#define clean_configarray()                                     \
+  do {                                                          \
+    if(config_array) {                                          \
+      free_config(config_array, config_count);                  \
+      free(config_array);                                       \
+      config_array = NULL;                                      \
+    }                                                           \
+  } while (0)
+
+#define cleanup()                                               \
+  do {                                                          \
+    clean_argarray();                                           \
+    clean_configarray();                                        \
+  } while (0)
+
+#define err(errmsg)                                             \
+  do {                                                          \
+    fprintf(stderr, "%s *ERROR*: %s", argv[0], errmsg);         \
+    cleanup();                                                  \
+  } while (0)
+
 //------------------------------------------------------*- C -*------
 // Main
 //
@@ -88,12 +121,12 @@ int main(int argc, char *argv[]) {
   }
 
   // -Parse the command line options.
-  for (int i = 0; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     if (argv[i] && strlen(argv[i]) > 1) {
+      if (argv[i][0] != '-') { arg_string = argv[i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'd') { default_string = argv[++i]; }
       if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
-      if (argv[i][0] != '-') { arg_string = argv[i]; }
     }
   }
 
@@ -151,7 +184,7 @@ int main(int argc, char *argv[]) {
 
   // -No argument (key = value or key) given so just
   //  print the config values.
-  if( argc == 3) {
+  if(argc == 3) {
     printconfigfile(config_array, config_count);
     free_config(config_array, config_count);
     free(config_array);
@@ -172,7 +205,7 @@ int main(int argc, char *argv[]) {
   //    look up the key in the config_file and disply it's value.
   //  key=value;
   //    Make a addition/replacement/update in the config_file.
-  if(arg_count >= 1) {
+  if (arg_count >= 1) {
 
     // Get the values associated with the argument passed to this function.
     char **config_line_array = get_value(config_array, config_count, arg_array[0]);
@@ -183,41 +216,26 @@ int main(int argc, char *argv[]) {
     // 2. wanting to be added; if so, add it.
     if (config_line_array == NULL) {
 
-      if(arg_count == 1) {                              /* Seems to be a simple search situation,
+      if (arg_count == 1) {                             /* Seems to be a simple search situation,
                                                            since, we do not have a key in the config
                                                            file, we exit.*/
-        fprintf(stderr, "Error: key not found\n");
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);                                /* cleanup */
-        arg_array = NULL;
-        free_config(config_array, config_count);
-        free(config_array);
-        config_array = NULL;
+        err("Error: key not found\n");
         return 1;
       }
-      if(arg_count > 1) {                               /* Seems to be a condition where the key/value
+      if (arg_count > 1) {                               /* Seems to be a condition where the key/value
                                                            needs to be appended to the config file.*/
-        //:~          printf("%-5s: %s = %s\n", file_string, arg_array[0], arg_array[1]);
-
         /* In the condition where the key is not found we need to
          * check to see if the string is not a += or -= operation
          * before we append the config file.  */
         if ((strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) ||
             (strnstr(arg_array[0], "+", strlen(arg_array[0])) != NULL)) {
-          printf("Incorrect syntax. Key is not found in config file.\n");
+          err("Incorrect syntax. Key is not found in config file.\n");
           return 1;
         }
 
         writevariable(arg_array[0], arg_array, arg_count, file_string);
 
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);
-        arg_array = NULL;
-
-        free_config(config_array, config_count);
-        free(config_array);
-        config_array = NULL;
-
+        cleanup();
         return 0;
       }
     }
@@ -236,12 +254,8 @@ int main(int argc, char *argv[]) {
         printf("%s ", *config_line_array++);
       }
       printf("\n");
-      for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-      free(arg_array);                                /* cleanup */
-      arg_array = NULL;
-      free_config(config_array, config_count);
-      free(config_array);
-      config_array = NULL;
+
+      cleanup();
       return 0;
     }
 
@@ -258,18 +272,9 @@ int main(int argc, char *argv[]) {
       //  and the `config_array` values.
       if (contains(config_line_array, i, arg_array[1]) == 0) {          /* 0 = A value was not found in the key's string... */
 
-        if (strnstr(arg_array[0], "-", strlen(arg_array[0])) != NULL) { /* However, if the user wants to subtract a value
+        if (strstr(arg_array[0], "-") != NULL) {                        /* However, if the user wants to subtract a value
                                                                            but the value was not found, we need to exit. */
-          printf("Value not found in value string. No change made.\n");
-
-          for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-          free(arg_array);
-          arg_array = NULL;
-
-          free_config(config_array, config_count);
-          free(config_array);
-          config_array = NULL;
-
+          err("Value not found in value string. No change made.\n");
           return 0;
         }
 
@@ -281,30 +286,20 @@ int main(int argc, char *argv[]) {
          */
         arg_array = NULL;
 
-        free_config(config_array, config_count);
-        free(config_array);
-        config_array = NULL;
-
+        cleanup();
         return 0;
 
-      } else if(contains(config_line_array, i, arg_array[1]) == 1) {   /* 1 = Value found... */
+      } else if(contains(config_line_array, i, arg_array[1]) == 1) {    /* 1 = Value found... */
+
+        if (strstr(arg_array[0], "+") != NULL) {                        /* However, if the user wants to add a value
+                                                                           for a value that was found, we need to exit. */
+          err("Value found in key's value string. No change made.\n");
+          return 0;
+        }
 
         replacevariable(config_line_array[0], arg_array, arg_count, file_string);
 
-        /* LOGIC:
-         * - The concept is to free `arg_array` up to the `arg_count`,
-         *   and allow the `print-config.c` to subtract from it's
-         *   counter to free any remaining value(s) from the
-         *   `arg_array`.
-         */
-        for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-        free(arg_array);
-        arg_array = NULL;
-
-        free_config(config_array, config_count);
-        free(config_array);
-        config_array = NULL;
-
+        cleanup();
         return 0;
       } else {                                                    /* Assume the user wants to set a value that already exits. */
         printf("Value found. No change made.\n");
@@ -312,14 +307,6 @@ int main(int argc, char *argv[]) {
     }   /* end_ if(arg_count > 1)  */
   }     /* end_ if(arg_count >= 1) */
 
-  // cleanup
-  for (int i = 0; i < arg_count; i++) free(arg_array[i]);
-  free(arg_array);
-  arg_array = NULL;
-
-  free_config(config_array, config_count);
-  free(config_array);
-  config_array = NULL;
-
+  cleanup();
   return 0;
 } ///:~

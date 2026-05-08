@@ -123,7 +123,7 @@ char* assemble_strings(char **value, int count) {
  *: stripspaces
  * @brief               Strips spaces from `str` and keeps track of indent level.
  */
-#define stripspaces()  while (isspace(*str) > 0 && *str != '\0') { indent++; str++; }
+#define stripspaces()  while (isspace(*str) > 0 && *str != '\0' && *str != '\n') { indent++; str++; }
 
 /**
  *: replacevariable
@@ -377,8 +377,8 @@ int replacevariable(const char *key, char **value, int count, const char *filena
             }
         } else {
           // Write the original line to the temp file
-          fprintf(temp_file, "%*s", indent, "");
-          fputs(str, temp_file);
+          fprintf(temp_file, "%*s%s", indent, "", str);
+//:~            fputs(str, temp_file);
         }
     }
     fclose(conf_file);
