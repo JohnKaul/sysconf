@@ -1,5 +1,7 @@
 # Changelog
 
+- Add test cases, fix typos. @msimerson
+
 v1.3.1 - 2026-05-07
 - Added macros to call for cleanup and errors. This cleans up the code
   a bit and makes it more standarized (less code duplication and
