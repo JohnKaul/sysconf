@@ -59,6 +59,7 @@ static char * test_contains() {
   arg_count = make_argv(arg_string, delimiters, &arg_array);
 
   mu_assert(contains(arg_array, arg_count, "value.sub") == 1);
+  mu_assert(contains(arg_array, arg_count, "key.sub") == 1);
 
   return 0;
 }
@@ -70,23 +71,43 @@ static char * test_contains() {
  *
  * PASS:    if `contains()` returns 1 when a value is found.
  *          mu_run_test("test_contains", "error, array does not contain \"value\"", test_contains);
+ * NOTE:
+ * `contains()` returns 0 = Not found. 1 = found. So, we do not want
+ * a match for a substring of a string.
  */
 static char * test_contains_exact() {
   int arg_count = 0;
   char delimiters[] = "=";
   char *arg_string = NULL;                              /* Used to store the argument string. */
-  arg_string = "key.sub=value.sub.sub";
   char **arg_array;                                     /* Used to store the argument
                                                            string pointer array */
+
+  arg_string = "key.sub=value.sub.sub";
   arg_count = make_argv(arg_string, delimiters, &arg_array);
+  mu_assert(contains(arg_array, arg_count, "value.sub") == 0);      // should not find.
+  mu_assert(contains(arg_array, arg_count, "value.sub.sub") == 1);  // should find.
+  mu_assert(contains(arg_array, arg_count, "keya") == 0);           // should not find.
+  for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+  free(arg_array);
+  arg_array = NULL;
 
-  mu_assert(contains(arg_array, arg_count, "value.sub") == 0);
-  /* `contains()` returns 0 = Not found. 1 = found. So, we do not want
-   * a match for a substring of a string.
-   */
+  arg_string = "keya.sub=value";
+  arg_count = make_argv(arg_string, delimiters, &arg_array);
+  mu_assert(contains(arg_array, arg_count, "value.sub") == 0); // should not find.
+  mu_assert(contains(arg_array, arg_count, "key") == 0);       // should not find.
+  mu_assert(contains(arg_array, arg_count, "value") == 1);     // should find.
+  for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+  free(arg_array);
+  arg_array = NULL;
 
-  arg_string = "key.sub=value";
-  mu_assert(contains(arg_array, arg_count, "value.sub") == 0);
+  arg_string = "anotherkey = one two";
+  arg_count = make_argv(arg_string, " =", &arg_array);
+  mu_assert(contains(arg_array, arg_count, "another") == 0);   // should not find.
+  mu_assert(contains(arg_array, arg_count, "two") == 1);       // should not find.
+  for (int i = 0; i < arg_count; i++) free(arg_array[i]);
+  free(arg_array);
+  arg_array = NULL;
+
 
   return 0;
 }
