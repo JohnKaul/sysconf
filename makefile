@@ -7,13 +7,11 @@
 sysconf : HEADERS	=	\
 	src/parse-config.h	\
 	src/print-config.h	\
-	src/version.h	\
-	src/abort.h
+	src/version.h
 
 sysconf : SOURCES	=	\
 	src/print-config.c	\
 	src/parse-config.c	\
-	src/abort.c	\
 	src/sysconf.c
 
 TEST_HEADERS	=	\
@@ -22,7 +20,6 @@ TEST_HEADERS	=	\
 TEST_SOURCES	=	\
 	src/print-config.c	\
 	src/parse-config.c	\
-	src/abort.c	\
 	test/test_sysconf.c
 
 #--------------------------------------------------------------------
