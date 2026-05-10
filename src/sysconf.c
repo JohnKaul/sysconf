@@ -41,13 +41,14 @@
 // If this utlity is called to set a key/value and the configuration
 // file doesn't exist, it will be created.
 //
-// SYNOPSYS
-//      sysconf -f configfile
-//      sysconf -f configfile -d configfile.defaults
-//      sysconf -f configfile [-n] [key]
-//      sysconf -f configfile [key=value]
-//      sysconf -f configfile [key+=value]
-//      sysconf -f configfile [key-=value]
+// SYNOPSIS
+//      sysconf [-n] [-d configfile.defaults] -f configfile
+//      sysconf [-n] [-d configfile.defaults] -f configfile key
+//      sysconf [-n] [-d configfile.defaults] -f configfile key=value
+//      sysconf [-n] [-d configfile.defaults] -f configfile key+=value
+//      sysconf [-n] [-d configfile.defaults] -f configfile key-=value
+//
+//      Options (-f, -d, -n) may be given in any order; -f is required.
 //===-------------------------------------------------------------===
 
 #include "parse-config.h"
@@ -117,30 +118,26 @@ int main(int argc, char *argv[]) {
   char delimiters[] = " \t\n\"\':=;";
   int keyvalue_output = 0;
 
-  // -Check the command line arguments.
-  //  if there are not enough arguments, exit.
-  if (argc < 3) {
-    usage();
-    fprintf(stderr, "Error: Invalid command line arguments\n");
-    return 1;
-  }
-
-  // -Parse the command line options.
-  for (int i = 1; i < argc; i++) {
-    if (argv[i] && strlen(argv[i]) > 1) {
-      if (argv[i][0] != '-') { arg_string = argv[i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'f') { file_string = argv[++i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'd') { default_string = argv[++i]; }
-      if (argv[i][0] == '-' && argv[i][1] == 'n') { keyvalue_output = 1; }
+  int opt;
+  while ((opt = getopt(argc, argv, "f:d:n")) != -1) {
+    switch (opt) {
+      case 'f': file_string    = optarg; break;
+      case 'd': default_string = optarg; break;
+      case 'n': keyvalue_output = 1;     break;
+      default:
+        usage();
+        fprintf(stderr, "Error: Invalid command line arguments\n");
+        return 1;
     }
   }
 
-  // -If there is not a `file_string` variable, quit.
-  if (! file_string) {
+  if (!file_string) {
     usage();
     fprintf(stderr, "Error: No configuration file to edit specified\n");
     return 1;
   }
+
+  if (optind < argc) arg_string = argv[optind];
 
   // -Keep a record of how many items in the config file.
   int config_count = 0;
@@ -190,7 +187,7 @@ int main(int argc, char *argv[]) {
 
   // -No argument (key = value or key) given so just
   //  print the config values.
-  if(argc == 3) {
+  if (arg_string == NULL) {
     printconfigfile(config_array, config_count);
     free_config(config_array, config_count);
     free(config_array);
