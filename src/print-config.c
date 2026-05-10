@@ -1,6 +1,5 @@
 #include "parse-config.h"
 #include "print-config.h"
-#include "abort.h"
 
 #include <stdio.h>
 #include <stdlib.h>
