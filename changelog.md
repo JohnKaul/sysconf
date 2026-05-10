@@ -1,5 +1,10 @@
 # Changelog
 
+v1.3.2 - 2026-05-10
+- Fixed program return codes. 
+  program now exits 0 on success, and >0 if an error occurs.
+- Added more unit tests (credit: @msimerson).
+
 v1.3.1 - 2026-05-07
 - Added macros to call for cleanup and errors. This cleans up the code
   a bit and makes it more standarized (less code duplication and
