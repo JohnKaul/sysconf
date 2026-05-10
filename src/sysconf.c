@@ -52,7 +52,6 @@
 
 #include "parse-config.h"
 #include "print-config.h"
-#include "abort.h"
 #include "version.h"
 
 #include <stdio.h>
@@ -94,6 +93,12 @@
     cleanup();                                                  \
   } while (0)
 
+#define usage()                                                 \
+  do {                                                          \
+    fprintf(stderr, "Version: %s\n", program_version);          \
+    fprintf(stderr, "Usage: %s -f file.conf [-d file.defaults] [-n] [key[=value]]\n", argv[0]); \
+  } while (0)
+
 //------------------------------------------------------*- C -*------
 // Main
 //
@@ -115,9 +120,9 @@ int main(int argc, char *argv[]) {
   // -Check the command line arguments.
   //  if there are not enough arguments, exit.
   if (argc < 3) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-    fprintf(stderr, "**** %s version: %s\n", argv[0], program_version);
-    AbortTranslation(abortInvalidCommandLineArgs);
+    usage();
+    fprintf(stderr, "Error: Invalid command line arguments\n");
+    return 1;
   }
 
   // -Parse the command line options.
@@ -132,8 +137,9 @@ int main(int argc, char *argv[]) {
 
   // -If there is not a `file_string` variable, quit.
   if (! file_string) {
-    fprintf(stderr, "Usage: %s -f <configuration file> <value to get>\n", argv[0]);
-    AbortTranslation(abortInvalidCommandLineArgs);
+    usage();
+    fprintf(stderr, "Error: No configuration file to edit specified\n");
+    return 1;
   }
 
   // -Keep a record of how many items in the config file.
@@ -145,7 +151,7 @@ int main(int argc, char *argv[]) {
 
   // -If we couldn't parse the file, quit.
   if (!config_array) {
-    printf("Failed to parse the configuration file.\n");
+    fprintf(stderr, "Failed to parse the configuration file.\n");
     free(config_array);
     return 1;
   }
@@ -157,7 +163,7 @@ int main(int argc, char *argv[]) {
     config_t* default_array = parse_config(default_string, &default_count, delimiters);
 
     if (!default_array) {
-      printf("Failed to parse the configuration file.\n");
+      fprintf(stderr, "Failed to parse the configuration file.\n");
       free(config_array);
       free(default_array);
       return 1;
