@@ -14,17 +14,17 @@ A utility to make changes to key/value type system configuration
 files.
 
 ## SYNOPSIS
-sysconf -f configfile
+sysconf -f file.conf
 
-sysconf -f configfile -d configfile.defaults
+sysconf -f file.conf -d file.conf.defaults
 
-sysconf -f configfile [-n] [key]
+sysconf -f file.conf [-n] [key]
 
-sysconf -f configfile [key=value]
+sysconf -f file.conf [key=value]
 
-sysconf -f configfile [key+=value]
+sysconf -f file.conf [key+=value]
 
-sysconf -f configfile [key-=value]
+sysconf -f file.conf [key-=value]
 
 ## OPTIONS
 -f      Configuration file
@@ -40,7 +40,7 @@ Operating systems and user tools have many configuration files which can be kept
 
 The current tool(s) in FreeBSD (`sysrc`) can be made to work on other files other than /etc/rc.conf but the tool does not handle configuration files written in UCL -i.e., with a dot in the name -e.g., jail.conf files. Other configuration settings (like: `sysctl` for kernel settings) are also kept using a different style than UCL. This utility is meant to offer simple key/value changes, for the different configuration styles/languages, in one tool (in lieu of several for example).  Although, this tool--while not being terribly robust and exhaustive--should offer the ability to make changes to many different style configuration key/value entries like the `sysrc` and `sysctl` type of tools with no external library dependencies. Meaning, this tool does not rely on third party libraries to parse UCL, JSON, etc. it uses a simple tokeniser to parse the entries and syntax to make changes/additions. Because this tool does not use external libraries, this ultimately limits it's use--it will not parse XML for example--but should offer a more consistent user interface for making changes to key/value type configuration files.
 
-By design this utility does not have many flags/options to specify actions to preform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
+By design this utility does not have many flags/options to specify actions to perform different actions, instead this utility will try to determine what to do (-i.e., add/change) based on the arguments given. See the examples below. This utility will also try to determine the syntax of the key/value pair by reading the configuration file (-i.e., it will try to determine if the value needs quotes or a termination character and either spaces or an equal sign or colon separation character).
 
 Example configuration file syntaxes this utility can parse/change:
 ```conf
@@ -69,47 +69,47 @@ It is also possible to check a configuration file's key/values against a default
 * Will not write a key twice - if a key/value already exists, this utility will not write a second entry.
 * Zero dependencies - will not break or fall behind if library is (not) updated.
 * Add or Remove values with either '+=' or '-='.
-* Check config file's key values against a default config file's default key values.
+* Check configuration file's key values against a default configuration file's default key values.
 
 ## EXAMPLES
-To list off some key/values in a config file.
+To list off some key/values in a configuration file.
 ```sh
-    syconf -f /path/config.file
+    syconf -f /path/file.conf
 ```
 
 To retrieve the value from a key in a file.
 ```sh
-    sysconf -f /path/config.file key
+    sysconf -f /path/file.conf key
 ```
 
 If there is a need to produce the key as well as the value in the output of a 'get a value' operation, the `-n` switch can be used.
 ```sh
-    sysconf -f /path/config.file -n key
+    sysconf -f /path/file.conf -n key
 ```
 
 To change a value associated with a key.
 ```sh
-    sysconf -f /path/config.file key=value
+    sysconf -f /path/file.conf key=value
 ```
 
 To add to a value associated with a key.
 ```sh
-    sysconf -f /path/config.file key+=value
+    sysconf -f /path/file.conf key+=value
 ```
 
 To remove a value associated with a key.
 ```sh
-    sysconf -f /path/config.file key-=value
+    sysconf -f /path/file.conf key-=value
 ```
 
 To use a dollar sign in a key, escape it.
 ```sh
-    sysconf -f /path/config.file \\$key
+    sysconf -f /path/file.conf \\$key
 ```
 
 To search for duplicate values in a configuration file against a default configuration file key values, use the -f and -d flags.
 ```sh
-    % sysconf -f /path/config.file -d /path/config.file.defaults
+    % sysconf -f /path/file.conf -d /path/file.conf.defaults
 ```
 _Real World Example_:
 ```sh
@@ -126,11 +126,11 @@ _Real World Example_:
 * This utility certainly isn't perfect but it works very well for the
   cases I need. So, if you're reading this and you think it sucks, well,
   this utility probably isn't for you then. Sorry, this utility does not
-  exist to serve all of your config file needs. -i.e., it does not do
+  exist to serve all of your configuration file needs. -i.e., it does not do
   YMAL, XML, JSON, etc., this is for simple key/value type files and can
-  preform a lot of same operations as `sysrc` for keys or values with
+  perform a lot of same operations as `sysrc` for keys or values with
   non standard characters. For the most part--currently--I do not need
-  all these config file languages because this utility is helping me on
+  all these configuration file languages because this utility is helping me on
   my servers (no GUI, no desktop, no docker, nothing fancy, just dead
   simple server stuff).
 
@@ -159,7 +159,7 @@ This project also has some unit testing which can be compiled and run.
 ```
 This will compile a file called `test_sysconf`.
 
-This project also has a shell script to preform some syntax type
+This project also has a shell script to perform some syntax type
 tests.
 
 ```sh
@@ -168,33 +168,61 @@ tests.
 ```
 
 ## CONTRIBUTION GUIDELINES
+Contributions should be single-subject only (single-line bug fixes,
+small refactors, spelling/typo fixes, etc.). Changes that touch
+multiple files or address several unrelated topics are hard to review
+and may have unforeseen side effects; contributions spanning multiple
+subjects may be requested to be split into smaller, focused commits or
+closed.
 
-### Version numbering
-Version number MAJOR.MINOR.PATCH:
-- **MAJOR** Non backward compatible changes
-- **MINOR** Added/improved (backward compatible) functionality/changes
-- **PATCH** Backward compatible bug fixes
+This project includes tests you can run against possible changes:
+- Syntax tests verify sysconf can perform basic functionality like
+  get/set a key using =, +=, and -=. See `test_synatx.sh`.
+- Unit tests verify internal library functions and behavior in
+  specific scenarios. See `test/test_synsconf.c`.
 
-#### Commiting
+Run tests:
+```sh
+    % make test
+    % ./test_sysconf    # unit tests
+    % ./test_syntax     # syntax tests
+```
 
-1.  List file(s) on the subject line. If committing several files
-    prefix the subject line with "(MF)"--which stands for "multiple
-    files" and separate each file with a comma.
-2.  Separate subject from body with a blank line.
-3.  Limit the subject line to 50 characters.
-4.  Do not end the subject line with a period.
-5.  Use the imperative mood in the subject line.
-6.  Wrap the body at 72 characters.
-7.  Use the body to explain what and why vs. how.
-8.  Update the `changelog` and `src/version.h` file for each
-    contribution.
+### Versioning
+Use MAJOR.MINOR.PATCH:
+- **MAJOR** — incompatible API changes
+- **MINOR** — added or improved backward-compatible functionality
+- **PATCH** — backward-compatible bug fixes
+
+### Committing
+1. List file(s) in the subject line. If committing several files,
+   prefix the subject line with "(MF)" (multiple files) and separate
+   filenames with commas.
+2. Separate subject from body with a blank line.
+3. Limit the subject line to 50 characters.
+4. Do not end the subject line with a period.
+5. Use the imperative mood in the subject line.
+6. Wrap the body at 72 characters.
+7. Use the body to explain what and why (not how).
+8. Update `changelog` and `src/version.h` for each contribution.
 
 Example commit:
 ```
-        (MF) changelog, version.h, sysconf.7:
+    (MF) changelog, version.h, sysconf.7
 
-        1. Updated documentation.
+    1. Update documentation.
 ```
+
+### Use of AI
+Code produced with AI assistance may be accepted only if it is:
+- Trivial and not copyrightable (e.g., single-line fixes, basic refactors), or
+- Accompanied by a public statement from the AI provider that they do
+  not assert copyright over the generated work.
+
+AI-assisted code is often harder to maintain and for that reason,
+human-authored patches for larger changes is preferred. Large-scope
+refactors or additions that appear to be AI-generated can be closed
+without explanation.
 
 ## HISTORY
 * Created for my personal use.
